@@ -1,19 +1,30 @@
+using GymManagement.Infrastructure;
 using GymManagement.Infrastructure.Context;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
+#region  add controllers with views and static assets
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+#endregion
 
+#region Services Registration
+builder.Services.AddInfrastructureServicesRegistration(builder.Configuration);
 
-//Add dbcontext
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-           .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
-
+#endregion
 
 var app = builder.Build();
+
+#region Apply EF Core Migrations
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
+#endregion
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -23,17 +34,24 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
+// ── Hangfire dashboard ────────────────────────────────────────────────────
+// Secured behind Admin role — configured in the Web layer step.
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    // Authorization filter added in Web layer (requires Admin role)
+    Authorization = []
+});
+
+// ── Register recurring jobs ────────────────────────────────────────────────
+InfrastructureServicesRegistration.RegisterHangfireJobs();
+
+// ── Remaining middleware added in Web layer step ───────────────────────────
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapStaticAssets();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
