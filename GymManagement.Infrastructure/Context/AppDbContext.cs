@@ -44,6 +44,7 @@ namespace GymManagement.Infrastructure.Context
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
+        // Global query filters and model configuration remain here
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder); // Identity tables first
@@ -53,8 +54,6 @@ namespace GymManagement.Infrastructure.Context
                 Assembly.GetAssembly(typeof(AppDbContext))!);
 
             // ── Global query filters — soft delete ─────────────────────────────
-            // Applied here in addition to individual configurations as a safety net.
-            // Any new SoftDeletableEntity added to the model is covered automatically.
             foreach (var entityType in builder.Model.GetEntityTypes())
             {
                 if (typeof(SoftDeletableEntity).IsAssignableFrom(entityType.ClrType))
@@ -73,49 +72,6 @@ namespace GymManagement.Infrastructure.Context
             where TEntity : SoftDeletableEntity
         {
             builder.Entity<TEntity>().HasQueryFilter(e => !e.IsDeleted);
-        }
-
-        // ── SaveChangesAsync override ──────────────────────────────────────────
-        public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
-        {
-            ProcessChanges();
-            return await base.SaveChangesAsync(ct);
-        }
-
-        public override int SaveChanges()
-        {
-            ProcessChanges();
-            return base.SaveChanges();
-        }
-
-        private void ProcessChanges()
-        {
-            var now = DateTime.UtcNow;
-
-            foreach (var entry in ChangeTracker.Entries<BaseEntity>())
-            {
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        // CreatedAt is set by the entity itself (init property)
-                        // CreatedById is set by the command handler before Add()
-                        break;
-
-                    case EntityState.Modified:
-                        entry.Entity.UpdatedAt = now;
-                        break;
-                }
-            }
-
-            // Intercept hard deletes on SoftDeletableEntity — convert to soft delete
-            foreach (var entry in ChangeTracker.Entries<SoftDeletableEntity>()
-                         .Where(e => e.State == EntityState.Deleted))
-            {
-                entry.State = EntityState.Modified;
-                entry.Entity.IsDeleted = true;
-                entry.Entity.DeletedAt = now;
-                // DeletedById must be set by the caller before Remove() is called
-            }
         }
     }
 }
