@@ -3,7 +3,6 @@ using GymManagement.Domain.Entities;
 using GymManagement.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Reflection;
 
 namespace GymManagement.Infrastructure.Context
@@ -21,14 +20,6 @@ namespace GymManagement.Infrastructure.Context
     public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
-        protected AppDbContext()
-        {
-        }
-
-        public AppDbContext(DbContextOptions options) : base(options)
-        {
-        }
 
         public DbSet<Trainee> Trainees => Set<Trainee>();
         public DbSet<Trainer> Trainers => Set<Trainer>();
