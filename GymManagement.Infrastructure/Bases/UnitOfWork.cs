@@ -1,5 +1,5 @@
 ﻿using GymManagement.Domain.Entities;
-using GymManagement.Infrastructure.Bases.Interfaces;
+using GymManagement.Domain.Interfaces;
 using GymManagement.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore.Storage;
 

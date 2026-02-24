@@ -1,6 +1,6 @@
 ﻿using GymManagement.Domain.Entities.Identity;
 using GymManagement.Infrastructure.Bases;
-using GymManagement.Infrastructure.Bases.Interfaces;
+using GymManagement.Domain.Interfaces;
 using GymManagement.Infrastructure.Context;
 using GymManagement.Infrastructure.Interceptors;
 using GymManagement.Infrastructure.Jobs;

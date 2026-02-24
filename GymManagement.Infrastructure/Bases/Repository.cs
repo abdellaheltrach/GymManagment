@@ -1,5 +1,5 @@
 ﻿using GymManagement.Domain.Bases;
-using GymManagement.Infrastructure.Bases.Interfaces;
+using GymManagement.Domain.Interfaces;
 using GymManagement.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;

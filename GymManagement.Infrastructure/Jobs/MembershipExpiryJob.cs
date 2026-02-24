@@ -1,6 +1,6 @@
 ﻿using GymManagement.Domain.Entities;
 using GymManagement.Domain.Enums;
-using GymManagement.Infrastructure.Bases.Interfaces;
+using GymManagement.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace GymManagement.Infrastructure.Jobs
