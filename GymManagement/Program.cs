@@ -1,3 +1,4 @@
+using GymManagement.Application.Extensions;
 using GymManagement.Infrastructure;
 using GymManagement.Infrastructure.Context;
 using Hangfire;
@@ -12,7 +13,9 @@ builder.Services.AddControllersWithViews();
 #endregion
 
 #region Services Registration
-builder.Services.AddInfrastructureServicesRegistration(builder.Configuration);
+builder.Services
+    .AddApplicationServicesRegistration()
+    .AddInfrastructureServicesRegistration(builder.Configuration);
 
 #endregion
 

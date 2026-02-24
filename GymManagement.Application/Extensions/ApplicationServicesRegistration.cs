@@ -6,9 +6,9 @@ using System.Reflection;
 
 namespace GymManagement.Application.Extensions;
 
-public static class DependencyInjection
+public static class ApplicationServicesRegistration
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    public static IServiceCollection AddApplicationServicesRegistration(this IServiceCollection services)
     {
         var assembly = Assembly.GetExecutingAssembly();
 

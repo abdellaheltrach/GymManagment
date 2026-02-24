@@ -1,3 +1,4 @@
+using GymManagement.Application._Features.Dashboard.Queries.Models;
 using GymManagement.Application.Common.DTOs;
 using GymManagement.Application.Common.Models;
 using GymManagement.Domain.Common;
@@ -5,7 +6,6 @@ using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
-using GymManagement.Application._Features.Dashboard.Queries.Models;
 
 namespace GymManagement.Application._Features.Dashboard.Queries.Handlers;
 
@@ -13,10 +13,10 @@ public class GetAdminDashboardQueryHandler(IUnitOfWork uow, IMemoryCache cache)
     : IRequestHandler<GetAdminDashboardQuery, Result<AdminDashboardDto>>
 {
     public async Task<Result<AdminDashboardDto>> Handle(
-        GetAdminDashboardQuery _, CancellationToken ct)
+        GetAdminDashboardQuery Query, CancellationToken ct)
     {
-        var now         = DateTime.UtcNow;
-        var monthStart  = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var now = DateTime.UtcNow;
+        var monthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
         var weekFromNow = now.AddDays(7);
 
         // Active members
@@ -43,7 +43,7 @@ public class GetAdminDashboardQueryHandler(IUnitOfWork uow, IMemoryCache cache)
 
         // Expiring this week
         var expiringThisWeek = await uow.Memberships.CountAsync(
-            m => m.Status  == MembershipStatus.Active &&
+            m => m.Status == MembershipStatus.Active &&
                  m.EndDate >= now &&
                  m.EndDate <= weekFromNow, ct);
 
