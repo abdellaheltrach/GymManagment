@@ -3,6 +3,7 @@
     /// <summary>
     /// Appends security-related HTTP response headers on every response.
     /// Registered after UseRouting so it runs for all matched routes.
+    /// protect the web application from common web attacks and hide server information.
     /// </summary>
     public class SecurityHeadersMiddleware
     {
