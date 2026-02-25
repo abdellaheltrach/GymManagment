@@ -1,60 +1,216 @@
 using GymManagement.Application.Extensions;
 using GymManagement.Infrastructure;
 using GymManagement.Infrastructure.Context;
+using GymManagement.Web.Middleware;
 using Hangfire;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Formatting.Json;
+using System.Threading.RateLimiting;
 
-
-var builder = WebApplication.CreateBuilder(args);
-
-#region  add controllers with views and static assets
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+#region Bootstrap Serilog
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 #endregion
 
-#region Services Registration
-builder.Services
-    .AddApplicationServicesRegistration()
-    .AddInfrastructureServicesRegistration(builder.Configuration);
-
-#endregion
-
-var app = builder.Build();
-
-#region Apply EF Core Migrations
-using (var scope = app.Services.CreateScope())
+try
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await dbContext.Database.MigrateAsync();
+    var builder = WebApplication.CreateBuilder(args);
+
+    #region Configure Serilog
+    builder.Host.UseSerilog((ctx, services, lc) => lc
+        .ReadFrom.Configuration(ctx.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .Enrich.WithMachineName()
+        .Enrich.WithEnvironmentName()
+        .WriteTo.Console(new JsonFormatter())
+        .WriteTo.Seq(ctx.Configuration["Seq:Url"] ?? "http://localhost:5341"));
+    #endregion
+
+    #region Add MVC Services
+    builder.Services.AddControllersWithViews(options =>
+    {
+        options.Filters.Add(
+            new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
+    });
+    #endregion
+
+    #region Register Application and Infrastructure Services
+    builder.Services
+        .AddApplicationServicesRegistration()
+        .AddInfrastructureServicesRegistration(builder.Configuration);
+    #endregion
+
+    #region Configure Authentication Cookie
+    builder.Services.ConfigureApplicationCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.Cookie.Name = "GymMgmt.Auth";
+    });
+    #endregion
+
+    #region Configure Authorization Policies
+    builder.Services.AddAuthorization(options =>
+    {
+        // By default, require authentication for all endpoints. Specific policies will further restrict access based on roles.
+
+        //options.FallbackPolicy =
+        //    new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        //    .RequireAuthenticatedUser()
+        //    .Build();
+
+        options.AddPolicy("CanManageTrainees",
+            p => p.RequireRole("Admin", "Receptionist"));
+
+        options.AddPolicy("CanManageTrainers",
+            p => p.RequireRole("Admin"));
+
+        options.AddPolicy("CanRecordPayments",
+            p => p.RequireRole("Admin", "Receptionist"));
+
+        options.AddPolicy("CanViewReports",
+            p => p.RequireRole("Admin"));
+
+        options.AddPolicy("CanManagePlans",
+            p => p.RequireRole("Admin"));
+
+        options.AddPolicy("CanMarkAttendance",
+            p => p.RequireRole("Admin", "Receptionist", "Trainer"));
+
+        options.AddPolicy("TrainerAccess",
+            p => p.RequireRole("Admin", "Trainer"));
+    });
+    #endregion
+
+    #region Configure Rate Limiting
+    builder.Services.AddRateLimiter(options =>
+    {
+        options.AddFixedWindowLimiter("LoginPolicy", o =>
+        {
+            o.Window = TimeSpan.FromMinutes(1);
+            o.PermitLimit = 10;
+            o.QueueLimit = 0;
+            o.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        });
+
+        options.AddSlidingWindowLimiter("GlobalPolicy", o =>
+        {
+            o.Window = TimeSpan.FromMinutes(1);
+            o.PermitLimit = 200;
+            o.SegmentsPerWindow = 4;
+            o.QueueLimit = 0;
+        });
+
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    });
+    #endregion
+
+    #region Add Health Checks
+    builder.Services.AddHealthChecks()
+        .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!)
+        .AddDbContextCheck<AppDbContext>()
+        .AddHangfire(setup =>
+        {
+            setup.MinimumAvailableServers = 1;
+        });
+    #endregion
+
+    #region Add Memory Cache
+    builder.Services.AddMemoryCache(); // Required for Hangfire Dashboard to store job information and dashboard state
+    #endregion
+
+    #region Build Application
+    var app = builder.Build();
+    #endregion
+
+    #region Apply EF Core Migration
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await dbContext.Database.MigrateAsync();
+    }
+    #endregion
+
+    #region Configure Exception Handling
+    if (!app.Environment.IsDevelopment()) // In production, use a custom error page and enable HSTS
+    {
+        app.UseExceptionHandler("/Home/Error");
+        app.UseHsts();
+    }
+    #endregion
+
+    #region Configure Middleware Pipeline
+
+    app.UseHttpsRedirection();
+
+    app.UseStaticFiles();
+
+    app.UseSerilogRequestLogging();
+
+    app.UseRouting();
+
+    app.UseMiddleware<SecurityHeadersMiddleware>();
+
+    app.UseRateLimiter();
+
+    app.UseAuthentication();
+
+    app.UseAuthorization();
+
+    #endregion
+
+    #region Configure Hangfire Dashboard
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions
+    {
+        Authorization = [],
+        DashboardTitle = "Gym Management — Jobs"
+    });
+    #endregion
+
+    #region Register Hangfire Jobs
+    InfrastructureServicesRegistration.RegisterHangfireJobs();
+    #endregion
+
+    #region Configure Routes
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Dashboard}/{action=Index}/{id?}");
+    #endregion
+
+    #region Configure Health Check Endpoints
+    // Returns Healthy if {checks}  ASP.NET Core app is running
+    app.MapHealthChecks("/health/live", new HealthCheckOptions
+    {
+        Predicate = _ => false
+    }).AllowAnonymous();
+
+    // Returns Healthy if all registered health checks are healthy
+    app.MapHealthChecks("/health/ready", new HealthCheckOptions()).AllowAnonymous();
+
+    #endregion
+
+    #region Run Application
+    await app.RunAsync();
+    #endregion
 }
-#endregion
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+catch (Exception ex) when (ex is not HostAbortedException) // Catch all exceptions except those related to host shutdown
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    Log.Fatal(ex, "Application terminated unexpectedly"); // Log the exception with Serilog at the Fatal level
 }
-
-
-// ── Hangfire dashboard ────────────────────────────────────────────────────
-// Secured behind Admin role — configured in the Web layer step.
-app.UseHangfireDashboard("/hangfire", new DashboardOptions
+finally
 {
-    // Authorization filter added in Web layer (requires Admin role)
-    Authorization = []
-});
-
-// ── Register recurring jobs ────────────────────────────────────────────────
-InfrastructureServicesRegistration.RegisterHangfireJobs();
-
-// ── Remaining middleware added in Web layer step ───────────────────────────
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
-
-app.Run();
+    Log.CloseAndFlush(); // Ensure all logs are flushed before application exits
+}
