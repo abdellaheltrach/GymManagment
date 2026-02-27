@@ -1,9 +1,9 @@
 using GymManagement.Application._Features.Dashboard.Queries.Models;
 using GymManagement.Application.Common.DTOs;
-using GymManagement.Application.Common.Models;
 using GymManagement.Domain.Common;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -71,9 +71,13 @@ public class GetAdminDashboardQueryHandler(IUnitOfWork uow, IMemoryCache cache)
             var count = assignments.Count(a => a.TrainerId == trainerId);
             topTrainers.Add(new TrainerSummaryDto(
                 trainer.Id,
+                trainer.FirstName,
+                trainer.LastName,
                 trainer.FullName,
                 trainer.Email,
+                trainer.Phone,
                 trainer.Specialization,
+                trainer.YearsOfExperience,
                 count,
                 trainer.IsActive
             ));

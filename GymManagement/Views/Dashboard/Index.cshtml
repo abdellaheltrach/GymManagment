@@ -1,0 +1,118 @@
+﻿@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Dashboard</h4>
+    <span class="text-muted small">@Model.CurrentMonthName</span>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small mb-1">Active Members</p>
+                        <h3 class="fw-bold mb-0">@Model.Data.TotalActiveMembers</h3>
+                    </div>
+                    <span class="fs-2">👥</span>
+                </div>
+                <p class="text-success small mt-2 mb-0">
+                    +@Model.Data.NewMembersThisMonth new this month
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small mb-1">Monthly Revenue</p>
+                        <h3 class="fw-bold mb-0">@Model.FormattedRevenue</h3>
+                    </div>
+                    <span class="fs-2">💰</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small mb-1">Expiring This Week</p>
+                        <h3 class="fw-bold mb-0 @(Model.Data.ExpiringThisWeek > 0 ? "text-warning" : "")">
+                            @Model.Data.ExpiringThisWeek
+                        </h3>
+                    </div>
+                    <span class="fs-2">⏰</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small mb-1">Pending Payments</p>
+                        <h3 class="fw-bold mb-0 @(Model.Data.PendingPayments > 0 ? "text-danger" : "")">
+                            @Model.Data.PendingPayments
+                        </h3>
+                    </div>
+                    <span class="fs-2">💳</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Trainers -->
+@if (Model.Data.TopTrainers.Any())
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white fw-semibold">
+            Top Trainers by Assigned Trainees
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Trainer</th>
+                        <th>Specialization</th>
+                        <th>Assigned Trainees</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var trainer in Model.Data.TopTrainers)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@trainer.FullName</td>
+                            <td><span class="badge bg-secondary">@trainer.Specialization</span></td>
+                            <td>@trainer.AssignedTraineeCount</td>
+                            <td>
+                                @if (trainer.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
