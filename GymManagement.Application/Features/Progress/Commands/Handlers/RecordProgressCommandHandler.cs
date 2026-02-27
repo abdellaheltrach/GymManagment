@@ -1,8 +1,8 @@
-using GymManagement.Application.Common.Models;
+using GymManagement.Application._Features.Progress.Commands.Models;
 using GymManagement.Domain.Entities;
 using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
 using MediatR;
-using GymManagement.Application._Features.Progress.Commands.Models;
 
 namespace GymManagement.Application._Features.Progress.Commands.Handlers;
 
@@ -17,17 +17,17 @@ public class RecordProgressCommandHandler(IUnitOfWork uow) : IRequestHandler<Rec
 
         var record = new ProgressRecord
         {
-            TraineeId       = cmd.TraineeId,
-            RecordedById    = cmd.RecordedById,
-            RecordedAt      = DateTime.UtcNow,
-            WeightKg        = cmd.WeightKg,
-            BodyFatPercent  = cmd.BodyFatPercent,
-            MuscleMassKg    = cmd.MuscleMassKg,
-            ChestCm         = cmd.ChestCm,
-            WaistCm         = cmd.WaistCm,
-            HipsCm          = cmd.HipsCm,
-            ArmCm           = cmd.ArmCm,
-            Notes           = cmd.Notes
+            TraineeId = cmd.TraineeId,
+            RecordedById = cmd.RecordedById,
+            RecordedAt = DateTime.UtcNow,
+            WeightKg = cmd.WeightKg,
+            BodyFatPercent = cmd.BodyFatPercent,
+            MuscleMassKg = cmd.MuscleMassKg,
+            ChestCm = cmd.ChestCm,
+            WaistCm = cmd.WaistCm,
+            HipsCm = cmd.HipsCm,
+            ArmCm = cmd.ArmCm,
+            Notes = cmd.Notes
         };
 
         await uow.ProgressRecords.AddAsync(record, ct);

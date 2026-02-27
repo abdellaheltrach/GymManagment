@@ -1,10 +1,10 @@
 using AutoMapper;
+using GymManagement.Application._Features.Trainees.Queries.Models;
 using GymManagement.Application.Common.DTOs;
-using GymManagement.Application.Common.Models;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
 using MediatR;
-using GymManagement.Application._Features.Trainees.Queries.Models;
 
 namespace GymManagement.Application._Features.Trainees.Queries.Handlers;
 
@@ -20,7 +20,7 @@ public class GetTraineeByIdQueryHandler(IUnitOfWork uow, IMapper mapper) : IRequ
         // Active membership
         var activeMembership = (await uow.Memberships.FindAsync(
             m => m.TraineeId == trainee.Id &&
-                 m.Status    == MembershipStatus.Active, ct))
+                 m.Status == MembershipStatus.Active, ct))
             .FirstOrDefault();
 
         var membershipDto = activeMembership is not null
@@ -29,8 +29,8 @@ public class GetTraineeByIdQueryHandler(IUnitOfWork uow, IMapper mapper) : IRequ
 
         // Assigned trainer
         var activeAssignment = (await uow.TrainerAssignments.FindAsync(
-            a => a.TraineeId  == trainee.Id &&
-                 a.RemovedAt  == null, ct))
+            a => a.TraineeId == trainee.Id &&
+                 a.RemovedAt == null, ct))
             .FirstOrDefault();
 
         string? trainerName = null;

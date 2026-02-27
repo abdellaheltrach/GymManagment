@@ -1,10 +1,9 @@
-using AutoMapper;
+using GymManagement.Application._Features.Trainees.Queries.Models;
 using GymManagement.Application.Common.DTOs;
-using GymManagement.Application.Common.Models;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
 using MediatR;
-using GymManagement.Application._Features.Trainees.Queries.Models;
 
 namespace GymManagement.Application._Features.Trainees.Queries.Handlers;
 
@@ -41,10 +40,10 @@ public class GetTraineesListQueryHandler(IUnitOfWork uow)
             filtered = filtered.Where(t => traineeIdsWithStatus.Contains(t.Id));
         }
 
-        var list        = filtered.ToList();
-        var totalCount  = list.Count;
-        var page        = query.Page < 1 ? 1 : query.Page;
-        var pageSize    = query.PageSize is < 1 or > 100 ? 20 : query.PageSize;
+        var list = filtered.ToList();
+        var totalCount = list.Count;
+        var page = query.Page < 1 ? 1 : query.Page;
+        var pageSize = query.PageSize is < 1 or > 100 ? 20 : query.PageSize;
 
         var paged = list
             .OrderBy(t => t.LastName).ThenBy(t => t.FirstName)

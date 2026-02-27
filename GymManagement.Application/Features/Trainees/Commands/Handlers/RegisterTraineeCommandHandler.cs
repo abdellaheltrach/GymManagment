@@ -1,9 +1,9 @@
-using GymManagement.Application.Common.Models;
+using GymManagement.Application._Features.Trainees.Commands.Models;
 using GymManagement.Domain.Entities;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
 using MediatR;
-using GymManagement.Application._Features.Trainees.Commands.Models;
 
 namespace GymManagement.Application._Features.Trainees.Commands.Handlers;
 
@@ -21,22 +21,22 @@ public class RegisterTraineeCommandHandler(IUnitOfWork uow) : IRequestHandler<Re
 
         var trainee = new Trainee
         {
-            FirstName              = cmd.FirstName,
-            LastName               = cmd.LastName,
-            Email                  = cmd.Email,
-            Phone                  = cmd.Phone,
-            NationalId             = cmd.NationalId,
-            DateOfBirth            = cmd.DateOfBirth,
-            Gender                 = cmd.Gender,
-            EmergencyContactName   = cmd.EmergencyContactName,
-            EmergencyContactPhone  = cmd.EmergencyContactPhone,
+            FirstName = cmd.FirstName,
+            LastName = cmd.LastName,
+            Email = cmd.Email,
+            Phone = cmd.Phone,
+            NationalId = cmd.NationalId,
+            DateOfBirth = cmd.DateOfBirth,
+            Gender = cmd.Gender,
+            EmergencyContactName = cmd.EmergencyContactName,
+            EmergencyContactPhone = cmd.EmergencyContactPhone,
             EmergencyContactRelation = cmd.EmergencyContactRelation,
-            Address                = cmd.Address,
-            MedicalNotes           = cmd.MedicalNotes,
-            HeightCm               = cmd.HeightCm,
-            WeightKg               = cmd.WeightKg,
-            JoinDate               = DateTime.UtcNow,
-            CreatedById            = cmd.CreatedById
+            Address = cmd.Address,
+            MedicalNotes = cmd.MedicalNotes,
+            HeightCm = cmd.HeightCm,
+            WeightKg = cmd.WeightKg,
+            JoinDate = DateTime.UtcNow,
+            CreatedById = cmd.CreatedById
         };
 
         await uow.Trainees.AddAsync(trainee, ct);
@@ -47,9 +47,9 @@ public class RegisterTraineeCommandHandler(IUnitOfWork uow) : IRequestHandler<Re
             var notification = new Notification
             {
                 UserId = trainee.ApplicationUserId ?? cmd.CreatedById,
-                Title  = "Welcome to the Gym!",
-                Body   = $"Welcome {trainee.FirstName}! Your account has been created. Please visit reception to activate your membership.",
-                Type   = NotificationType.General
+                Title = "Welcome to the Gym!",
+                Body = $"Welcome {trainee.FirstName}! Your account has been created. Please visit reception to activate your membership.",
+                Type = NotificationType.General
             };
             await uow.Notifications.AddAsync(notification, ct);
         }

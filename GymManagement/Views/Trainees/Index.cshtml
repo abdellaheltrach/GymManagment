@@ -1,0 +1,138 @@
+﻿@model TraineeListViewModel
+@{
+    ViewData["Title"] = "Trainees";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Trainees</h4>
+    @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+    {
+        <a asp-action="Create" class="btn btn-dark btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Register Trainee
+        </a>
+    }
+</div>
+
+<!-- Search + Filter -->
+<form asp-action="Index" method="get" class="row g-2 mb-4">
+    <div class="col-md-5">
+        <input type="text" name="search" value="@Model.SearchTerm"
+               class="form-control" placeholder="Search by name, email or phone…" />
+    </div>
+    <div class="col-md-3">
+        <select name="status" class="form-select">
+            <option value="">All statuses</option>
+            @foreach (var s in Enum.GetValues<GymManagement.Domain.Enums.MembershipStatus>())
+            {
+                <option value="@s" selected="@(Model.StatusFilter == s)">@s</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-dark">
+            <i class="bi bi-search"></i> Search
+        </button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+    </div>
+</form>
+
+<!-- Table -->
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Joined</th>
+                    <th>Membership</th>
+                    <th>Expires</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model.Trainees)
+                {
+                    <tr>
+                        <td class="fw-semibold">@t.FullName</td>
+                        <td class="text-muted small">@t.Email</td>
+                        <td class="text-muted small">@t.Phone</td>
+                        <td class="small">@t.JoinDate.ToString("dd MMM yyyy")</td>
+                        <td>
+                            @if (t.ActiveMembershipStatus.HasValue)
+                            {
+                                var badgeClass = t.ActiveMembershipStatus switch
+                                {
+                                    GymManagement.Domain.Enums.MembershipStatus.Active => "bg-success",
+                                    GymManagement.Domain.Enums.MembershipStatus.Frozen => "bg-info",
+                                    GymManagement.Domain.Enums.MembershipStatus.PendingPayment => "bg-warning text-dark",
+                                    GymManagement.Domain.Enums.MembershipStatus.Expired => "bg-danger",
+                                    _ => "bg-secondary"
+                                };
+                                <span class="badge @badgeClass">@t.ActiveMembershipStatus</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-dark border">No membership</span>
+                            }
+                        </td>
+                        <td class="small">
+                            @(t.MembershipEndDate.HasValue
+                                                    ? t.MembershipEndDate.Value.ToString("dd MMM yyyy")
+                                                    : "—")
+                        </td>
+                        <td class="text-end">
+                            <a asp-action="Details" asp-route-id="@t.Id"
+                               class="btn btn-sm btn-outline-dark">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Trainees.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No trainees found.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+@if (Model.Pagination.TotalPages > 1)
+{
+    <nav class="mt-4">
+        <ul class="pagination pagination-sm justify-content-center">
+            <li class="page-item @(!Model.Pagination.HasPreviousPage ? "disabled" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-page="@(Model.Pagination.CurrentPage - 1)"
+                   asp-route-search="@Model.SearchTerm">Previous</a>
+            </li>
+            @for (int i = 1; i <= Model.Pagination.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.Pagination.CurrentPage ? "active" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-search="@Model.SearchTerm">@i</a>
+                </li>
+            }
+            <li class="page-item @(!Model.Pagination.HasNextPage ? "disabled" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-page="@(Model.Pagination.CurrentPage + 1)"
+                   asp-route-search="@Model.SearchTerm">Next</a>
+            </li>
+        </ul>
+    </nav>
+    <p class="text-center text-muted small">
+        Showing page @Model.Pagination.CurrentPage of @Model.Pagination.TotalPages
+        (@Model.Pagination.TotalCount total)
+    </p>
+}
