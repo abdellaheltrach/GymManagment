@@ -1,7 +1,7 @@
-using GymManagement.Application.Common.Models;
-using GymManagement.Domain.Interfaces;
-using MediatR;
 using GymManagement.Application._Features.Attendance.Commands.Models;
+using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
+using MediatR;
 
 namespace GymManagement.Application._Features.Attendance.Commands.Handlers;
 
@@ -13,8 +13,8 @@ public class CheckOutCommandHandler(IUnitOfWork uow) : IRequestHandler<CheckOutC
         var today = DateTime.UtcNow.Date;
 
         var openAttendance = await uow.Attendances.FirstOrDefaultAsync(
-            a => a.TraineeId    == cmd.TraineeId &&
-                 a.CheckInTime  >= today         &&
+            a => a.TraineeId == cmd.TraineeId &&
+                 a.CheckInTime >= today &&
                  a.CheckOutTime == null, ct);
 
         if (openAttendance is null)

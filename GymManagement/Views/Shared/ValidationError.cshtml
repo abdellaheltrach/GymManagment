@@ -1,0 +1,38 @@
+@{
+    ViewData["Title"] = "Validation Error";
+    var errors = Context.Items["ValidationErrors"] as IDictionary<string, string[]>;
+}
+
+<div class="row justify-content-center py-5">
+    <div class="col-lg-6">
+        <div class="text-center mb-5">
+            <div class="display-3 text-danger mb-3"><i class="bi bi-shield-exclamation"></i></div>
+            <h2 class="fw-bold">Validation Failed</h2>
+            <p class="text-secondary">One or more validation errors occurred while processing your request.</p>
+        </div>
+
+        @if (errors != null && errors.Any())
+        {
+            <div class="card border-0 shadow-sm overflow-hidden">
+                <div class="card-header bg-danger text-white py-3">
+                    <h6 class="mb-0 fw-bold">Resolution Required</h6>
+                </div>
+                <div class="card-body bg-light">
+                    <ul class="mb-0 small text-danger">
+                        @foreach (var entry in errors)
+                        {
+                            foreach (var error in entry.Value)
+                            {
+                                <li class="mb-1"><strong>@entry.Key</strong>: @error</li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+        
+        <div class="text-center mt-4">
+            <button onclick="history.back()" class="btn btn-dark px-4">Go Back & Correct</button>
+        </div>
+    </div>
+</div>

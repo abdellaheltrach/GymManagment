@@ -1,0 +1,12 @@
+@{
+    ViewData["Title"] = "Conflict";
+}
+
+<div class="text-center py-5">
+    <div class="display-1 text-warning mb-4"><i class="bi bi-exclamation-octagon"></i> 409</div>
+    <h1 class="fw-bold">Data Conflict</h1>
+    <p class="text-secondary mb-4">
+        @Context.Items["ErrorMessage"] ?? "This action would create a conflict with existing data (e.g. duplicate email) or the record was modified by another user."
+    </p>
+    <button onclick="history.back()" class="btn btn-dark px-4">Go Back & Retry</button>
+</div>

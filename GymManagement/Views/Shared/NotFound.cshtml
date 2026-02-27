@@ -1,0 +1,12 @@
+@{
+    ViewData["Title"] = "Not Found";
+}
+
+<div class="text-center py-5">
+    <div class="display-1 text-muted mb-4"><i class="bi bi-search"></i> 404</div>
+    <h1 class="fw-bold">Resource Not Found</h1>
+    <p class="text-secondary mb-4">
+        @Context.Items["ErrorMessage"] ?? "The page or record you are looking for does not exist or has been moved."
+    </p>
+    <a href="/" class="btn btn-dark px-4">Return Home</a>
+</div>

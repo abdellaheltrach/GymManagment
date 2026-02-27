@@ -1,13 +1,12 @@
 ﻿@{
-    ViewData["Title"] = "Error";
-    var message = ViewBag.ErrorMessage as string ?? "An unexpected error occurred.";
+    ViewData["Title"] = "Access Denied";
 }
 
 <div class="d-flex align-items-center justify-content-center" style="min-height: 60vh;">
     <div class="text-center">
-        <div class="display-1 fw-bold text-secondary mb-3">⚠</div>
-        <h4 class="fw-bold">Something went wrong</h4>
-        <p class="text-muted">@message</p>
+        <div class="display-1 fw-bold text-danger mb-3">403</div>
+        <h4 class="fw-bold">Access Denied</h4>
+        <p class="text-muted">You don't have permission to view this page.</p>
         <a asp-controller="Dashboard" asp-action="Index" class="btn btn-dark">
             <i class="bi bi-house me-1"></i> Back to Dashboard
         </a>
