@@ -5,6 +5,8 @@ namespace GymManagement.Domain.Interfaces;
 
 public interface IRepository<T> where T : BaseEntity
 {
+    public IQueryable<T> AsQueryable();
+
     public Task<T?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
     public Task<IReadOnlyList<T>> GetAllAsync(CancellationToken ct = default);
