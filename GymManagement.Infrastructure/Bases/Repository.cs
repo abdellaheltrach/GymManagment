@@ -16,6 +16,8 @@ namespace GymManagement.Infrastructure.Bases
             _context = context;
             _dbSet = context.Set<T>();
         }
+        
+        public IQueryable<T> AsQueryable() => _dbSet.AsNoTracking();
 
         public async Task<T?> GetByIdAsync(Guid id, CancellationToken ct = default)
             => await _dbSet.FindAsync([id], ct);

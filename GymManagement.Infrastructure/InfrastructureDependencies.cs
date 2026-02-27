@@ -4,6 +4,8 @@ using GymManagement.Domain.Interfaces;
 using GymManagement.Infrastructure.Context;
 using GymManagement.Infrastructure.Interceptors;
 using GymManagement.Infrastructure.Jobs;
+using GymManagement.Infrastructure.Persistence;
+using GymManagement.Infrastructure.Identity;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Identity;
@@ -76,6 +78,12 @@ namespace GymManagement.Infrastructure
 
             // ── Repository & Unit of Work ──────────────────────────────────────
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // ── Database Seeder ────────────────────────────────────────────────
+            services.AddScoped<DatabaseSeeder>();
+
+            // ── Identity Service ──────────────────────────────────────────────
+            services.AddScoped<IIdentityService, IdentityService>();
 
             // ── Memory cache (for RevenueReportJob) ───────────────────────────
             services.AddMemoryCache();
