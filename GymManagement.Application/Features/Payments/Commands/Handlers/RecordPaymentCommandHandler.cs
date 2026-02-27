@@ -1,9 +1,9 @@
-using GymManagement.Application.Common.Models;
+using GymManagement.Application._Features.Payments.Commands.Models;
 using GymManagement.Domain.Entities;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
 using MediatR;
-using GymManagement.Application._Features.Payments.Commands.Models;
 
 namespace GymManagement.Application._Features.Payments.Commands.Handlers;
 
@@ -29,12 +29,12 @@ public class RecordPaymentCommandHandler(IUnitOfWork uow) : IRequestHandler<Reco
         // Create payment record
         var payment = new Payment
         {
-            MembershipId    = cmd.MembershipId,
-            Amount          = cmd.Amount,
-            Method          = cmd.Method,
-            Status          = PaymentStatus.Paid,
-            RecordedById    = cmd.RecordedById,
-            Notes           = cmd.Notes,
+            MembershipId = cmd.MembershipId,
+            Amount = cmd.Amount,
+            Method = cmd.Method,
+            Status = PaymentStatus.Paid,
+            RecordedById = cmd.RecordedById,
+            Notes = cmd.Notes,
             ReferenceNumber = $"PAY-{Guid.NewGuid():N}"[..12].ToUpper()
         };
 
@@ -56,9 +56,9 @@ public class RecordPaymentCommandHandler(IUnitOfWork uow) : IRequestHandler<Reco
             await uow.Notifications.AddAsync(new Notification
             {
                 UserId = trainee.ApplicationUserId,
-                Title  = "Payment Received",
-                Body   = $"Payment of {cmd.Amount:C} received. Remaining balance: {membership.RemainingBalance:C}.",
-                Type   = NotificationType.PaymentReceived
+                Title = "Payment Received",
+                Body = $"Payment of {cmd.Amount:C} received. Remaining balance: {membership.RemainingBalance:C}.",
+                Type = NotificationType.PaymentReceived
             }, ct);
         }
 

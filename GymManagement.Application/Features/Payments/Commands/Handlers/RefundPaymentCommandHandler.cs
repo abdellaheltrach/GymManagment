@@ -1,8 +1,8 @@
-using GymManagement.Application.Common.Models;
+using GymManagement.Application._Features.Payments.Commands.Models;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
 using MediatR;
-using GymManagement.Application._Features.Payments.Commands.Models;
 
 namespace GymManagement.Application._Features.Payments.Commands.Handlers;
 
@@ -23,16 +23,16 @@ public class RefundPaymentCommandHandler(IUnitOfWork uow) : IRequestHandler<Refu
             return Result.NotFound("Membership", payment.MembershipId);
 
         // Mark payment as refunded
-        payment.IsRefunded   = true;
-        payment.RefundedAt   = DateTime.UtcNow;
+        payment.IsRefunded = true;
+        payment.RefundedAt = DateTime.UtcNow;
         payment.RefundedById = cmd.RefundedById;
         payment.RefundReason = cmd.Reason;
-        payment.Status       = PaymentStatus.Refunded;
+        payment.Status = PaymentStatus.Refunded;
         uow.Payments.Update(payment);
 
         // Subtract from membership balance
-        membership.AmountPaid  -= payment.Amount;
-        membership.UpdatedById  = cmd.RefundedById;
+        membership.AmountPaid -= payment.Amount;
+        membership.UpdatedById = cmd.RefundedById;
 
         // If membership was Active and is now under-paid, revert to PendingPayment
         if (!membership.IsFullyPaid && membership.Status == MembershipStatus.Active)

@@ -1,6 +1,5 @@
 using GymManagement.Application.Common.Behaviours;
 using GymManagement.Domain.Enums;
-using MediatR;
 
 namespace GymManagement.Application._Features.Payments.Commands.Models;
 
