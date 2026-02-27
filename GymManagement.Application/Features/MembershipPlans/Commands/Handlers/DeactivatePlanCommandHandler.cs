@@ -1,7 +1,7 @@
-using GymManagement.Application.Common.Models;
-using GymManagement.Domain.Interfaces;
-using MediatR;
 using GymManagement.Application._Features.MembershipPlans.Commands.Models;
+using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
+using MediatR;
 
 namespace GymManagement.Application._Features.MembershipPlans.Commands.Handlers;
 

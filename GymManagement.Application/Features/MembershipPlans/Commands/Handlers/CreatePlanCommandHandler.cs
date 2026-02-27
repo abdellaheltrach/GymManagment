@@ -1,8 +1,8 @@
-using GymManagement.Application.Common.Models;
+using GymManagement.Application._Features.MembershipPlans.Commands.Models;
 using GymManagement.Domain.Entities;
 using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
 using MediatR;
-using GymManagement.Application._Features.MembershipPlans.Commands.Models;
 
 namespace GymManagement.Application._Features.MembershipPlans.Commands.Handlers;
 
@@ -17,14 +17,14 @@ public class CreatePlanCommandHandler(IUnitOfWork uow) : IRequestHandler<CreateP
 
         var plan = new MembershipPlan
         {
-            Name                   = cmd.Name,
-            Description            = cmd.Description,
-            DurationDays           = cmd.DurationDays,
-            Price                  = cmd.Price,
-            AccessLevel            = cmd.AccessLevel,
+            Name = cmd.Name,
+            Description = cmd.Description,
+            DurationDays = cmd.DurationDays,
+            Price = cmd.Price,
+            AccessLevel = cmd.AccessLevel,
             IncludesPersonalTrainer = cmd.IncludesPersonalTrainer,
-            MaxFreezeDays          = cmd.MaxFreezeDays,
-            IsActive               = true
+            MaxFreezeDays = cmd.MaxFreezeDays,
+            IsActive = true
         };
 
         await uow.MembershipPlans.AddAsync(plan, ct);

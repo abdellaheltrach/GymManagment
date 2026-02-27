@@ -1,0 +1,64 @@
+﻿@model IReadOnlyList<GymManagement.Application.Common.DTOs.MembershipPlanDto>
+@{
+    ViewData["Title"] = "Membership Plans";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Membership Plans</h4>
+    <a asp-action="Create" class="btn btn-dark btn-sm">
+        <i class="bi bi-plus-lg me-1"></i> New Plan
+    </a>
+</div>
+
+<div class="row g-3">
+    @foreach (var plan in Model)
+    {
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="fw-bold mb-0">@plan.Name</h5>
+                        @if (plan.IncludesPersonalTrainer)
+                        {
+                            <span class="badge bg-warning text-dark">PT Included</span>
+                        }
+                    </div>
+                    <p class="text-muted small mb-3">@plan.Description</p>
+
+                    <dl class="row small mb-3">
+                        <dt class="col-6 text-muted">Price</dt>
+                        <dd class="col-6 fw-bold">@plan.Price.ToString("C")</dd>
+
+                        <dt class="col-6 text-muted">Duration</dt>
+                        <dd class="col-6">@plan.DurationDays days</dd>
+
+                        <dt class="col-6 text-muted">Access</dt>
+                        <dd class="col-6">
+                            <span class="badge bg-secondary">@plan.AccessLevel</span>
+                        </dd>
+
+                        <dt class="col-6 text-muted">Max Freeze</dt>
+                        <dd class="col-6">@plan.MaxFreezeDays days</dd>
+                    </dl>
+
+                    <form asp-action="Deactivate" method="post"
+                          onsubmit="return confirm('Deactivate this plan?')">
+                        <input type="hidden" name="id" value="@plan.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                            <i class="bi bi-x-circle me-1"></i> Deactivate
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+    @if (!Model.Any())
+    {
+        <div class="col-12">
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-card-checklist fs-1 d-block mb-2"></i>
+                No active plans yet. Create one to get started.
+            </div>
+        </div>
+    }
+</div>

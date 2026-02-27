@@ -1,0 +1,82 @@
+﻿@using GymManagement.Domain.Results
+@using GymManagement.Web.Controllers
+@model CreatePlanViewModel
+@{
+    ViewData["Title"] = "New Membership Plan";
+}
+
+<div class="mb-4">
+    <a asp-action="Index" class="text-muted small text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i> Back to Plans
+    </a>
+    <h4 class="fw-bold mt-1 mb-0">Create Membership Plan</h4>
+</div>
+
+<div class="card border-0 shadow-sm" style="max-width: 560px;">
+    <div class="card-body p-4">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger small py-2 mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label fw-semibold small"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label fw-semibold small"></label>
+                <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label asp-for="DurationDays" class="form-label fw-semibold small"></label>
+                    <div class="input-group">
+                        <input asp-for="DurationDays" class="form-control" />
+                        <span class="input-group-text">days</span>
+                    </div>
+                    <span asp-validation-for="DurationDays" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Price" class="form-label fw-semibold small"></label>
+                    <div class="input-group">
+                        <span class="input-group-text">MAD</span>
+                        <input asp-for="Price" class="form-control" />
+                    </div>
+                    <span asp-validation-for="Price" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="AccessLevel" class="form-label fw-semibold small"></label>
+                    <select asp-for="AccessLevel" class="form-select"
+                            asp-items="Html.GetEnumSelectList<GymManagement.Domain.Enums.AccessLevel>()"></select>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="MaxFreezeDays" class="form-label fw-semibold small"></label>
+                    <div class="input-group">
+                        <input asp-for="MaxFreezeDays" class="form-control" />
+                        <span class="input-group-text">days</span>
+                    </div>
+                    <span asp-validation-for="MaxFreezeDays" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-4 form-check">
+                <input asp-for="IncludesPersonalTrainer" class="form-check-input" />
+                <label asp-for="IncludesPersonalTrainer" class="form-check-label fw-semibold small">
+                    Includes Personal Trainer
+                </label>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-dark px-4">
+                    <i class="bi bi-check-lg me-1"></i> Create Plan
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
