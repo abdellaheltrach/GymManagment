@@ -1,6 +1,9 @@
 using GymManagement.Application.Extensions;
 using GymManagement.Infrastructure;
 using GymManagement.Infrastructure.Context;
+using GymManagement.Infrastructure.Persistence;
+using GymManagement.Web.Bases;
+using GymManagement.Web.Filters;
 using GymManagement.Web.Middleware;
 using Hangfire;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -65,12 +68,12 @@ try
     #region Configure Authorization Policies
     builder.Services.AddAuthorization(options =>
     {
-        // By default, require authentication for all endpoints. Specific policies will further restrict access based on roles.
-
-        //options.FallbackPolicy =
-        //    new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-        //    .RequireAuthenticatedUser()
-        //    .Build();
+        // By default, require authentication for all endpoints.
+        // Controllers/actions that should be public must use [AllowAnonymous].
+        options.FallbackPolicy =
+            new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
 
         options.AddPolicy("CanManageTrainees",
             p => p.RequireRole("Admin", "Receptionist"));
@@ -132,15 +135,28 @@ try
     builder.Services.AddMemoryCache(); // Required for Hangfire Dashboard to store job information and dashboard state
     #endregion
 
+
+
+
+    // builder.Services.AddScoped<DatabaseSeeder>(); // Now registered in Infrastructure
+
+
     #region Build Application
     var app = builder.Build();
     #endregion
 
-    #region Apply EF Core Migration
+    #region Apply EF Core Migration & Seeding
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await dbContext.Database.MigrateAsync();
+
+        if (app.Environment.IsDevelopment())
+        {
+            await dbContext.Database.MigrateAsync();
+        }
+
+        var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+        await seeder.SeedAsync();
     }
     #endregion
 
@@ -157,6 +173,10 @@ try
     app.UseHttpsRedirection();
 
     app.UseStaticFiles();
+
+    app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+    app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
 
     app.UseSerilogRequestLogging();
 
@@ -175,7 +195,7 @@ try
     #region Configure Hangfire Dashboard
     app.UseHangfireDashboard("/hangfire", new DashboardOptions
     {
-        Authorization = [],
+        Authorization = [new HangfireAuthorizationFilter()],
         DashboardTitle = "Gym Management — Jobs"
     });
     #endregion
