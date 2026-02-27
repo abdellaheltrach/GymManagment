@@ -2,7 +2,6 @@ using GymManagement.Application.Extensions;
 using GymManagement.Infrastructure;
 using GymManagement.Infrastructure.Context;
 using GymManagement.Infrastructure.Persistence;
-using GymManagement.Web.Bases;
 using GymManagement.Web.Filters;
 using GymManagement.Web.Middleware;
 using Hangfire;
