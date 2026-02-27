@@ -1,4 +1,4 @@
-using GymManagement.Application.Common.Models;
+
 using GymManagement.Domain.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -22,7 +22,7 @@ public class TransactionBehaviour<TRequest, TResponse>
         IUnitOfWork uow,
         ILogger<TransactionBehaviour<TRequest, TResponse>> logger)
     {
-        _uow    = uow;
+        _uow = uow;
         _logger = logger;
     }
 

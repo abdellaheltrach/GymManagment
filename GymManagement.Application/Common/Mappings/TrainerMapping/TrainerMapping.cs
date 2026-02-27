@@ -1,4 +1,3 @@
-using AutoMapper;
 using GymManagement.Application.Common.DTOs;
 using GymManagement.Domain.Entities;
 
@@ -11,9 +10,13 @@ public partial class MappingProfile
         CreateMap<Trainer, TrainerSummaryDto>()
             .ConstructUsing((src, ctx) => new TrainerSummaryDto(
                 src.Id,
+                src.FirstName,
+                src.LastName,
                 src.FullName,
                 src.Email,
+                src.Phone,
                 src.Specialization,
+                src.YearsOfExperience,
                 src.TrainerAssignments.Count(a => a.RemovedAt == null),
                 src.IsActive
             ));
@@ -23,16 +26,17 @@ public partial class MappingProfile
                 src.Id,
                 src.FirstName,
                 src.LastName,
+                src.FullName,
                 src.Email,
                 src.Phone,
                 src.Specialization,
                 src.Bio,
                 src.YearsOfExperience,
+                src.HireDate,
+                src.IsActive,
                 src.SalaryType,
                 src.BaseSalary,
                 src.CommissionPerTrainee,
-                src.HireDate,
-                src.IsActive,
                 src.TrainerAssignments.Count(a => a.RemovedAt == null)
             ));
     }

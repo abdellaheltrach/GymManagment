@@ -1,0 +1,58 @@
+﻿@model FreezeMembershipViewModel
+@{
+    ViewData["Title"] = "Freeze Membership";
+}
+
+<div class="mb-4">
+    <h4 class="fw-bold mb-0">Freeze Membership</h4>
+    <p class="text-muted small">Trainee: <strong>@Model.TraineeName</strong></p>
+</div>
+
+<div class="card border-0 shadow-sm" style="max-width: 500px;">
+    <div class="card-body p-4">
+        <div class="alert alert-info small">
+            <i class="bi bi-info-circle me-2"></i>
+            Remaining freeze days available: <strong>@Model.MaxFreezeDaysRemaining</strong>
+        </div>
+
+        <form asp-action="Freeze" method="post">
+            <input type="hidden" asp-for="MembershipId" />
+            <input type="hidden" asp-for="TraineeName" />
+            <input type="hidden" asp-for="MaxFreezeDaysRemaining" />
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger small py-2 mb-3"></div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label asp-for="FreezeFrom" class="form-label fw-semibold small"></label>
+                    <input asp-for="FreezeFrom" class="form-control" type="date" />
+                    <span asp-validation-for="FreezeFrom" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="FreezeTo" class="form-label fw-semibold small"></label>
+                    <input asp-for="FreezeTo" class="form-control" type="date" />
+                    <span asp-validation-for="FreezeTo" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Reason" class="form-label fw-semibold small"></label>
+                <textarea asp-for="Reason" class="form-control" rows="3"
+                          placeholder="e.g. Travelling abroad, medical leave…"></textarea>
+                <span asp-validation-for="Reason" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-info btn-sm px-4 text-white">
+                    <i class="bi bi-snow me-1"></i> Freeze Membership
+                </button>
+                <a asp-controller="Trainees" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

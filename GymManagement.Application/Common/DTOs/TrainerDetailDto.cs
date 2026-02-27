@@ -6,15 +6,16 @@ public record TrainerDetailDto(
     Guid Id,
     string FirstName,
     string LastName,
+    string FullName,
     string Email,
     string Phone,
     TrainerSpecialization Specialization,
     string? Bio,
     int YearsOfExperience,
+    DateTime HireDate,
+    bool IsActive,
     SalaryType SalaryType,
     decimal? BaseSalary,
     decimal? CommissionPerTrainee,
-    DateTime HireDate,
-    bool IsActive,
     int AssignedTraineeCount
 );

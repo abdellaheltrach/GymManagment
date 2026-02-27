@@ -1,10 +1,10 @@
 using AutoMapper;
+using GymManagement.Application._Features.Memberships.Queries.Models;
 using GymManagement.Application.Common.DTOs;
-using GymManagement.Application.Common.Models;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
 using MediatR;
-using GymManagement.Application._Features.Memberships.Queries.Models;
 
 namespace GymManagement.Application._Features.Memberships.Queries.Handlers;
 
@@ -17,8 +17,8 @@ public class GetActiveMembershipQueryHandler(IUnitOfWork uow, IMapper mapper)
     {
         var membership = (await uow.Memberships.FindAsync(
             m => m.TraineeId == query.TraineeId &&
-                 m.Status    == MembershipStatus.Active &&
-                 m.EndDate   >  DateTime.UtcNow, ct))
+                 m.Status == MembershipStatus.Active &&
+                 m.EndDate > DateTime.UtcNow, ct))
             .FirstOrDefault();
 
         if (membership is null)

@@ -1,9 +1,9 @@
-using GymManagement.Application.Common.Models;
+using GymManagement.Application._Features.Memberships.Commands.Models;
 using GymManagement.Domain.Entities;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
 using MediatR;
-using GymManagement.Application._Features.Memberships.Commands.Models;
 
 namespace GymManagement.Application._Features.Memberships.Commands.Handlers;
 
@@ -20,7 +20,7 @@ public class AssignMembershipCommandHandler(IUnitOfWork uow) : IRequestHandler<A
         // Guard: no currently active membership
         var hasActive = await uow.Memberships.AnyAsync(
             m => m.TraineeId == cmd.TraineeId &&
-                 m.Status    == MembershipStatus.Active, ct);
+                 m.Status == MembershipStatus.Active, ct);
 
         if (hasActive)
             return Result<Guid>.Conflict("Trainee already has an active membership.");
@@ -38,15 +38,15 @@ public class AssignMembershipCommandHandler(IUnitOfWork uow) : IRequestHandler<A
         // Create membership
         var membership = new Membership
         {
-            TraineeId   = cmd.TraineeId,
-            PlanId      = cmd.PlanId,
-            StartDate   = cmd.StartDate.Date,
-            EndDate     = cmd.StartDate.Date.AddDays(plan.DurationDays),
+            TraineeId = cmd.TraineeId,
+            PlanId = cmd.PlanId,
+            StartDate = cmd.StartDate.Date,
+            EndDate = cmd.StartDate.Date.AddDays(plan.DurationDays),
             TotalAmount = plan.Price,
-            Status      = cmd.InitialPaymentAmount >= plan.Price
+            Status = cmd.InitialPaymentAmount >= plan.Price
                             ? MembershipStatus.Active
                             : MembershipStatus.PendingPayment,
-            Notes       = cmd.Notes,
+            Notes = cmd.Notes,
             CreatedById = cmd.RecordedById
         };
 
@@ -57,11 +57,11 @@ public class AssignMembershipCommandHandler(IUnitOfWork uow) : IRequestHandler<A
         {
             var payment = new Payment
             {
-                MembershipId    = membership.Id,
-                Amount          = cmd.InitialPaymentAmount,
-                Method          = cmd.PaymentMethod,
-                Status          = PaymentStatus.Paid,
-                RecordedById    = cmd.RecordedById,
+                MembershipId = membership.Id,
+                Amount = cmd.InitialPaymentAmount,
+                Method = cmd.PaymentMethod,
+                Status = PaymentStatus.Paid,
+                RecordedById = cmd.RecordedById,
                 ReferenceNumber = $"PAY-{Guid.NewGuid():N}"[..12].ToUpper()
             };
 
@@ -73,9 +73,9 @@ public class AssignMembershipCommandHandler(IUnitOfWork uow) : IRequestHandler<A
         var notification = new Notification
         {
             UserId = trainee.ApplicationUserId ?? cmd.RecordedById,
-            Title  = "Membership Activated",
-            Body   = $"Your {plan.Name} membership is active until {membership.EndDate:dd MMM yyyy}.",
-            Type   = NotificationType.General
+            Title = "Membership Activated",
+            Body = $"Your {plan.Name} membership is active until {membership.EndDate:dd MMM yyyy}.",
+            Type = NotificationType.General
         };
         await uow.Notifications.AddAsync(notification, ct);
 

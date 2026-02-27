@@ -1,4 +1,4 @@
-using GymManagement.Application.Common.Models;
+using GymManagement.Domain.Results;
 using MediatR;
 
 namespace GymManagement.Application.Common.Behaviours;

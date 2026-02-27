@@ -1,9 +1,9 @@
-using GymManagement.Application.Common.Models;
+using GymManagement.Application._Features.Memberships.Commands.Models;
 using GymManagement.Domain.Entities;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
 using MediatR;
-using GymManagement.Application._Features.Memberships.Commands.Models;
 
 namespace GymManagement.Application._Features.Memberships.Commands.Handlers;
 
@@ -24,7 +24,7 @@ public class RenewMembershipCommandHandler(IUnitOfWork uow) : IRequestHandler<Re
 
         if (recent is not null)
         {
-            var isExpired   = recent.Status == MembershipStatus.Expired;
+            var isExpired = recent.Status == MembershipStatus.Expired;
             var expiringSoon = recent.EndDate <= DateTime.UtcNow.AddDays(7);
 
             if (!isExpired && !expiringSoon)
@@ -37,13 +37,13 @@ public class RenewMembershipCommandHandler(IUnitOfWork uow) : IRequestHandler<Re
 
         var membership = new Membership
         {
-            TraineeId   = cmd.TraineeId,
-            PlanId      = cmd.PlanId,
-            StartDate   = startDate,
-            EndDate     = startDate.AddDays(plan.DurationDays),
+            TraineeId = cmd.TraineeId,
+            PlanId = cmd.PlanId,
+            StartDate = startDate,
+            EndDate = startDate.AddDays(plan.DurationDays),
             TotalAmount = plan.Price,
-            AmountPaid  = cmd.InitialPaymentAmount,
-            Status      = cmd.InitialPaymentAmount >= plan.Price
+            AmountPaid = cmd.InitialPaymentAmount,
+            Status = cmd.InitialPaymentAmount >= plan.Price
                             ? MembershipStatus.Active
                             : MembershipStatus.PendingPayment,
             CreatedById = cmd.RecordedById
@@ -55,11 +55,11 @@ public class RenewMembershipCommandHandler(IUnitOfWork uow) : IRequestHandler<Re
         {
             var payment = new Payment
             {
-                MembershipId    = membership.Id,
-                Amount          = cmd.InitialPaymentAmount,
-                Method          = cmd.PaymentMethod,
-                Status          = PaymentStatus.Paid,
-                RecordedById    = cmd.RecordedById,
+                MembershipId = membership.Id,
+                Amount = cmd.InitialPaymentAmount,
+                Method = cmd.PaymentMethod,
+                Status = PaymentStatus.Paid,
+                RecordedById = cmd.RecordedById,
                 ReferenceNumber = $"PAY-{Guid.NewGuid():N}"[..12].ToUpper()
             };
             await uow.Payments.AddAsync(payment, ct);

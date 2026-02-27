@@ -1,4 +1,3 @@
-using AutoMapper;
 using GymManagement.Application.Common.DTOs;
 using GymManagement.Domain.Entities;
 

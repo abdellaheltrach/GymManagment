@@ -1,9 +1,9 @@
-using GymManagement.Application.Common.Models;
+using GymManagement.Application._Features.Memberships.Commands.Models;
 using GymManagement.Domain.Entities;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
 using MediatR;
-using GymManagement.Application._Features.Memberships.Commands.Models;
 
 namespace GymManagement.Application._Features.Memberships.Commands.Handlers;
 
@@ -35,7 +35,7 @@ public class FreezeMembershipCommandHandler(IUnitOfWork uow) : IRequestHandler<F
         // Check no existing active freeze
         var existingFreeze = await uow.FrozenPeriods.AnyAsync(
             f => f.MembershipId == cmd.MembershipId &&
-                 f.FrozenTo     > DateTime.UtcNow, ct);
+                 f.FrozenTo > DateTime.UtcNow, ct);
 
         if (existingFreeze)
             return Result<Guid>.Conflict("Membership already has an active freeze period.");
@@ -43,15 +43,15 @@ public class FreezeMembershipCommandHandler(IUnitOfWork uow) : IRequestHandler<F
         var frozenPeriod = new FrozenPeriod
         {
             MembershipId = cmd.MembershipId,
-            FrozenFrom   = cmd.FreezeFrom,
-            FrozenTo     = cmd.FreezeTo,
-            Reason       = cmd.Reason,
+            FrozenFrom = cmd.FreezeFrom,
+            FrozenTo = cmd.FreezeTo,
+            Reason = cmd.Reason,
             RequestedById = cmd.RequestedById
         };
 
         await uow.FrozenPeriods.AddAsync(frozenPeriod, ct);
 
-        membership.Status    = MembershipStatus.Frozen;
+        membership.Status = MembershipStatus.Frozen;
         membership.UpdatedById = cmd.RequestedById;
         uow.Memberships.Update(membership);
 

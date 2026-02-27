@@ -24,7 +24,7 @@ public class LoggingBehaviour<TRequest, TResponse>
         CancellationToken ct)
     {
         var requestName = typeof(TRequest).Name;
-        var sw          = Stopwatch.StartNew();
+        var sw = Stopwatch.StartNew();
 
         _logger.LogInformation("Handling {RequestName}", requestName);
 
