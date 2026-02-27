@@ -1,25 +1,24 @@
-using GymManagement.Models;
+﻿using GymManagement.Web.Bases;
+using GymManagement.Web.ViewModels.Shared;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
-namespace GymManagement.Controllers
+namespace GymManagement.Web.Controllers
 {
+    [Route("[controller]")]
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        [AllowAnonymous]
+        [Route("error")]
+        [Route("error/{id}")]
+        public IActionResult Error(string? id)
         {
-            return View();
-        }
+            if (id == "404" || id == "NotFound") return View("NotFound");
+            if (id == "409" || id == "Conflict") return View("Conflict");
+            if (id == "BadRequest" || id == "ValidationError") return View("ValidationError");
+            if (id == "403" || id == "AccessDenied") return View("AccessDenied");
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel { ErrorMessage = id ?? "An unexpected error occurred." });
         }
     }
 }
