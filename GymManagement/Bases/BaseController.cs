@@ -1,4 +1,4 @@
-﻿using GymManagement.Application.Common.Models;
+﻿using GymManagement.Domain.Results;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,6 +43,7 @@ namespace GymManagement.Web.Bases
             {
                 ResultErrorType.NotFound => NotFound(),
                 ResultErrorType.Forbidden => Forbid(),
+                ResultErrorType.Conflict => BadRequestWithError(result.Error!),
                 _ => BadRequestWithError(result.Error!)
             };
         }
