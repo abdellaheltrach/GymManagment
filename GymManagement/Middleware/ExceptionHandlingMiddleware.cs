@@ -76,7 +76,7 @@ namespace GymManagement.Web.Middleware
             }
         }
 
-        private static async Task RenderErrorViewAsync(
+        private static Task RenderErrorViewAsync(
             HttpContext context,
             string viewName,
             string message)
@@ -84,16 +84,17 @@ namespace GymManagement.Web.Middleware
             // Store message for the error view to pick up
             context.Items["ErrorMessage"] = message;
 
-            // Redirect to the error controller which renders the correct view
-            context.Request.Path = $"/Home/Error/{viewName}";
-
             // If headers already sent we cannot redirect — just write a plain response
-            if (!context.Response.HasStarted)
+            if (context.Response.HasStarted)
             {
                 context.Response.ContentType = "text/html";
-                await context.Response.WriteAsync(
+                return context.Response.WriteAsync(
                     $"<html><body><h2>{message}</h2></body></html>");
             }
+
+            // Redirect to the error controller which renders the correct view
+            context.Response.Redirect($"/Home/Error/{viewName}");
+            return Task.CompletedTask;
         }
     }
 }
