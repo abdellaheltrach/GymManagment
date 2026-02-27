@@ -1,8 +1,8 @@
-using GymManagement.Application.Common.Models;
+using GymManagement.Application._Features.Trainers.Commands.Models;
 using GymManagement.Domain.Entities;
 using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
 using MediatR;
-using GymManagement.Application._Features.Trainers.Commands.Models;
 
 namespace GymManagement.Application._Features.Trainers.Commands.Handlers;
 
@@ -28,10 +28,10 @@ public class AssignTrainerCommandHandler(IUnitOfWork uow) : IRequestHandler<Assi
 
         var assignment = new TrainerAssignment
         {
-            TrainerId    = cmd.TrainerId,
-            TraineeId    = cmd.TraineeId,
+            TrainerId = cmd.TrainerId,
+            TraineeId = cmd.TraineeId,
             AssignedById = cmd.AssignedById,
-            AssignedAt   = DateTime.UtcNow
+            AssignedAt = DateTime.UtcNow
         };
 
         await uow.TrainerAssignments.AddAsync(assignment, ct);

@@ -1,7 +1,7 @@
-using GymManagement.Application.Common.Models;
-using GymManagement.Domain.Interfaces;
-using MediatR;
 using GymManagement.Application._Features.Trainers.Commands.Models;
+using GymManagement.Domain.Interfaces;
+using GymManagement.Domain.Results;
+using MediatR;
 
 namespace GymManagement.Application._Features.Trainers.Commands.Handlers;
 
@@ -16,8 +16,8 @@ public class RemoveTrainerCommandHandler(IUnitOfWork uow) : IRequestHandler<Remo
             return Result.NotFound("No active trainer assignment found for this trainee.");
 
         // Soft-remove — history preserved, never deleted
-        assignment.RemovedAt     = DateTime.UtcNow;
-        assignment.RemovedById   = cmd.RemovedById;
+        assignment.RemovedAt = DateTime.UtcNow;
+        assignment.RemovedById = cmd.RemovedById;
         assignment.RemovalReason = cmd.Reason;
 
         uow.TrainerAssignments.Update(assignment);

@@ -1,0 +1,108 @@
+@model TrainerDetailViewModel
+@{
+    ViewData["Title"] = "Trainer Details";
+    var t = Model.Trainer;
+}
+
+<div class="mb-4">
+    <a asp-action="Index" class="text-decoration-none text-muted small">
+        <i class="bi bi-arrow-left"></i> Back to Trainers
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Bio & Core Info -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4 text-center p-4">
+            <div class="avatar-circle-lg bg-dark text-white mx-auto mb-3">
+                @t.FirstName[0]@t.LastName[0]
+            </div>
+            <h5 class="fw-bold mb-1">@t.FullName</h5>
+            <span class="badge bg-secondary mb-3">@t.Specialization</span>
+            
+            <div class="d-grid gap-2 mt-2">
+                <button class="btn btn-outline-dark btn-sm">
+                    <i class="bi bi-envelope me-1"></i> Send Email
+                </button>
+            </div>
+            <hr />
+            <div class="text-start small">
+                <p class="mb-1 text-muted">Contact Info</p>
+                <div class="mb-2"><i class="bi bi-telephone me-2"></i>@t.Phone</div>
+                <div class="mb-2"><i class="bi bi-envelope me-2"></i>@t.Email</div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm p-4">
+            <h6 class="fw-bold mb-3">Professional Bio</h6>
+            <p class="text-muted small mb-0">
+                @(string.IsNullOrWhiteSpace(t.Bio) ? "No biography provided." : t.Bio)
+            </p>
+        </div>
+    </div>
+
+    <!-- Right Column: Stats & Experience -->
+    <div class="col-lg-8">
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-3 text-center">
+                    <div class="text-muted small mb-1">Experience</div>
+                    <div class="h4 fw-bold mb-0">@t.YearsOfExperience</div>
+                    <div class="small text-muted">Years</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-3 text-center">
+                    <div class="text-muted small mb-1">Hire Date</div>
+                    <div class="h4 fw-bold mb-0">@t.HireDate.Year</div>
+                    <div class="small text-muted">@t.HireDate.ToString("MMM dd")</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-3 text-center">
+                    <div class="text-muted small mb-1">Status</div>
+                    <div class="h4 fw-bold mb-0">@(t.IsActive ? "Active" : "Inactive")</div>
+                    <div class="small text-muted">Current</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assigned Trainees (Placeholder) -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="fw-bold mb-0">Assigned Trainees (@Model.AssignedTrainees.Count)</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Trainee</th>
+                            <th>Status</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var trainee in Model.AssignedTrainees)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@trainee.FullName</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td class="text-end">
+                                    <a href="/Trainees/Details/@trainee.Id" class="btn btn-sm btn-link text-dark p-0">View</a>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.AssignedTrainees.Any())
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-3">
+                                    No trainees assigned yet.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
