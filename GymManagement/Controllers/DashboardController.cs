@@ -6,14 +6,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GymManagement.Web.Controllers
 {
-    [Authorize]
+    [AllowAnonymous]
     [Route("[controller]")]
     public class DashboardController : BaseController
     {
         [HttpGet]
+        [Route("/")]
+
         public async Task<IActionResult> Index(CancellationToken ct)
         {
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                return RedirectToAction("Login", "Account", new { ReturnUrl = "/Dashboard" });
+            }
+
             var result = await Mediator.Send(new GetAdminDashboardQuery(), ct);
+
 
             return HandleResult(result, data => View(new AdminDashboardViewModel
             {

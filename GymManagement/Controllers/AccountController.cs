@@ -55,7 +55,7 @@ namespace GymManagement.Web.Controllers
                 user.UserName!,
                 vm.Password,
                 vm.RememberMe,
-                lockoutOnFailure: true);
+                lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
