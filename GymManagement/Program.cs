@@ -207,7 +207,7 @@ try
     //{landing} Map to Dashboard controller when when no specific rout in URL
     app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Dashboard}/");
+        pattern: "{controller=Dashboard}/{action=Index}/{id?}");
     #endregion
 
     #region Configure Health Check Endpoints

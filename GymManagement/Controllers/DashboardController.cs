@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace GymManagement.Web.Controllers
 {
     [AllowAnonymous]
-    [Route("[controller]")]
+
     public class DashboardController : BaseController
     {
         [HttpGet]
+        [Route("[controller]")]
         [Route("/")]
-
         public async Task<IActionResult> Index(CancellationToken ct)
         {
             if (!User.Identity?.IsAuthenticated ?? true)
