@@ -1,6 +1,8 @@
 
 using GymManagement.Domain.Interfaces;
+using GymManagement.Infrastructure.Context;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace GymManagement.Application.Common.Behaviours;
@@ -16,40 +18,50 @@ public class TransactionBehaviour<TRequest, TResponse>
     where TRequest : notnull
 {
     private readonly IUnitOfWork _uow;
+    private readonly AppDbContext _context;
     private readonly ILogger<TransactionBehaviour<TRequest, TResponse>> _logger;
 
     public TransactionBehaviour(
         IUnitOfWork uow,
-        ILogger<TransactionBehaviour<TRequest, TResponse>> logger)
+        ILogger<TransactionBehaviour<TRequest, TResponse>> logger,
+        AppDbContext context)
     {
         _uow = uow;
         _logger = logger;
+        _context = context;
     }
-
     public async Task<TResponse> Handle(
-        TRequest request,
-        RequestHandlerDelegate<TResponse> next,
-        CancellationToken ct)
+    TRequest request,
+    RequestHandlerDelegate<TResponse> next,
+    CancellationToken ct)
     {
         if (request is not ICommandBase)
             return await next();
 
         var requestName = typeof(TRequest).Name;
-        _logger.LogDebug("Beginning transaction for {RequestName}", requestName);
+        TResponse response = default!;
 
-        await _uow.BeginTransactionAsync(ct);
-        try
+        var strategy = _context.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async cancellationToken =>
         {
-            var response = await next();
-            await _uow.CommitTransactionAsync(ct);
-            _logger.LogDebug("Committed transaction for {RequestName}", requestName);
-            return response;
-        }
-        catch (Exception ex)
-        {
-            await _uow.RollbackTransactionAsync(ct);
-            _logger.LogError(ex, "Rolled back transaction for {RequestName}", requestName);
-            throw;
-        }
+            await using var tx = await _context.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                response = await next();
+                await _context.SaveChangesAsync(cancellationToken);
+                await tx.CommitAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await tx.RollbackAsync(cancellationToken);
+                _logger.LogError(ex, "Rolled back transaction for {RequestName}", requestName);
+
+                throw;
+            }
+        }, ct);
+
+        return response;
     }
+
 }

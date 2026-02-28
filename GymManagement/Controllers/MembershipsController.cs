@@ -13,11 +13,10 @@ namespace GymManagement.Web.Controllers
 {
 
     [Authorize]
-    [Route("[controller]")]
     public class MembershipsController : BaseController
     {
         // ── Assign ─────────────────────────────────────────────────────────────────
-        [HttpGet("assign/{traineeId:guid}")]
+        [HttpGet]
         [Authorize(Policy = "CanManageTrainees")]
         public async Task<IActionResult> Assign(Guid traineeId, CancellationToken ct)
         {
@@ -35,7 +34,7 @@ namespace GymManagement.Web.Controllers
             });
         }
 
-        [HttpPost("assign")]
+        [HttpPost]
         [Authorize(Policy = "CanManageTrainees")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Assign(AssignMembershipViewModel vm, CancellationToken ct)
@@ -66,7 +65,7 @@ namespace GymManagement.Web.Controllers
         }
 
         // ── Renew ──────────────────────────────────────────────────────────────────
-        [HttpPost("renew")]
+        [HttpPost]
         [Authorize(Policy = "CanManageTrainees")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Renew(
@@ -86,7 +85,7 @@ namespace GymManagement.Web.Controllers
         }
 
         // ── Freeze ─────────────────────────────────────────────────────────────────
-        [HttpGet("freeze/{traineeId:guid}")]
+        [HttpGet]
         [Authorize(Policy = "CanManageTrainees")]
         public async Task<IActionResult> Freeze(Guid traineeId, CancellationToken ct)
         {
@@ -114,7 +113,7 @@ namespace GymManagement.Web.Controllers
             });
         }
 
-        [HttpPost("freeze")]
+        [HttpPost]
         [Authorize(Policy = "CanManageTrainees")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Freeze(FreezeMembershipViewModel vm, CancellationToken ct)

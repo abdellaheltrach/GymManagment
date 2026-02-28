@@ -27,9 +27,9 @@ public class AnonymiseTraineeCommandHandler(IUnitOfWork uow) : IRequestHandler<A
         trainee.Address = null;
         trainee.MedicalNotes = null;
         trainee.PhotoPath = null;
-        trainee.EmergencyContactName = "Anonymised";
-        trainee.EmergencyContactPhone = "000-000-0000";
-        trainee.EmergencyContactRelation = null;
+        trainee.EmergencyContactName = trainee.EmergencyContactName;
+        trainee.EmergencyContactPhone = trainee.EmergencyContactPhone;
+        trainee.EmergencyContactRelation = trainee.EmergencyContactRelation;
         trainee.ApplicationUserId = null;
         trainee.IsAnonymised = true;
         trainee.UpdatedById = cmd.RequestedById;

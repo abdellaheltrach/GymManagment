@@ -1,16 +1,13 @@
-﻿using GymManagement.Web.Bases;
-using GymManagement.Web.ViewModels.Shared;
+﻿using GymManagement.Web.ViewModels.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymManagement.Web.Controllers
 {
-    [Route("[controller]")]
     public class HomeController : Controller
     {
         [AllowAnonymous]
-        [Route("error")]
-        [Route("error/{id}")]
+
         public IActionResult Error(string? id)
         {
             if (id == "404" || id == "NotFound") return View("NotFound");

@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace GymManagement.Web.Controllers
 {
-    [Route("[controller]")]
     public class AccountController : BaseController
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -26,7 +25,7 @@ namespace GymManagement.Web.Controllers
         }
 
         // ── Login ──────────────────────────────────────────────────────────────────
-        [HttpGet("login")]
+        [HttpGet]
         [AllowAnonymous]
         public IActionResult Login(string? returnUrl = null)
         {
@@ -36,7 +35,7 @@ namespace GymManagement.Web.Controllers
             return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
 
-        [HttpPost("login")]
+        [HttpPost]
         [AllowAnonymous]
         [EnableRateLimiting("LoginPolicy")]
         public async Task<IActionResult> Login(LoginViewModel vm)
@@ -84,7 +83,7 @@ namespace GymManagement.Web.Controllers
         }
 
         // ── Logout ─────────────────────────────────────────────────────────────────
-        [HttpPost("logout")]
+        [HttpPost]
         [Authorize]
         public async Task<IActionResult> Logout()
         {
@@ -94,7 +93,7 @@ namespace GymManagement.Web.Controllers
         }
 
         // ── Access Denied ──────────────────────────────────────────────────────────
-        [HttpGet("access-denied")]
+        [HttpGet]
         [AllowAnonymous]
         public IActionResult AccessDenied() => View();
     }

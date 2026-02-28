@@ -9,7 +9,6 @@ namespace GymManagement.Web.Controllers
 {
 
     [Authorize(Policy = "CanManagePlans")]
-    [Route("membership-plans")]
     public class MembershipPlansController : BaseController
     {
         [HttpGet]
@@ -22,7 +21,7 @@ namespace GymManagement.Web.Controllers
         [HttpGet]
         public IActionResult Create() => View(new CreatePlanViewModel());
 
-        [HttpPost("create")]
+        [HttpPost]
         [Authorize(Policy = "CanManagePlans")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreatePlanViewModel vm, CancellationToken ct)
@@ -42,7 +41,7 @@ namespace GymManagement.Web.Controllers
             return RedirectWithSuccess("Plan created.", nameof(Index));
         }
 
-        [HttpPost("deactivate")]
+        [HttpPost]
         [Authorize(Policy = "CanManagePlans")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Deactivate(Guid id, CancellationToken ct)

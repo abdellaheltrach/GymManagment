@@ -9,7 +9,6 @@ namespace GymManagement.Web.Controllers
 {
 
     [Authorize(Policy = "CanMarkAttendance")]
-    [Route("[controller]")]
     public class AttendanceController : BaseController
     {
         [HttpPost]

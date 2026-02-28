@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace GymManagement.Web.Controllers
 {
     [Authorize]
-    [Route("[controller]")]
     public class TrainersController : BaseController
     {
         // ── List ───────────────────────────────────────────────────────────────────
@@ -41,23 +40,23 @@ namespace GymManagement.Web.Controllers
         }
 
         // ── Details ────────────────────────────────────────────────────────────────
-        [HttpGet("{id:guid}")]
+        [HttpGet]
         public async Task<IActionResult> Details(Guid id, CancellationToken ct)
         {
             var result = await Mediator.Send(new GetTrainerByIdQuery(id), ct);
-            return HandleResult(result, dto => View(new TrainerDetailViewModel 
-            { 
+            return HandleResult(result, dto => View(new TrainerDetailViewModel
+            {
                 Trainer = dto,
                 AssignedTrainees = [] // Query for assigned trainees if needed
             }));
         }
 
         // ── Create ─────────────────────────────────────────────────────────────────
-        [HttpGet("create")]
+        [HttpGet]
         [Authorize(Policy = "CanManageTrainers")]
         public IActionResult Create() => View(new CreateTrainerViewModel());
 
-        [HttpPost("create")]
+        [HttpPost]
         [Authorize(Policy = "CanManageTrainers")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateTrainerViewModel vm, CancellationToken ct)
@@ -66,7 +65,7 @@ namespace GymManagement.Web.Controllers
 
             var result = await Mediator.Send(new RegisterTrainerCommand(
                 vm.FirstName, vm.LastName, vm.Email, vm.Phone, vm.DateOfBirth,
-                vm.Specialization, vm.Bio, vm.YearsOfExperience, 
+                vm.Specialization, vm.Bio, vm.YearsOfExperience,
                 vm.SalaryType, vm.BaseSalary, vm.CommissionPerTrainee,
                 vm.Password, User.GetUserId()), ct);
 
