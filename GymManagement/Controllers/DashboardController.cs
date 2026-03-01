@@ -1,4 +1,4 @@
-using GymManagement.Application._Features.Dashboard.Queries.Models;
+using GymManagement.Application.Features.Dashboard.Queries.Models;
 using GymManagement.Web.Bases;
 using GymManagement.Web.ViewModels.Dashboard;
 using Microsoft.AspNetCore.Authorization;

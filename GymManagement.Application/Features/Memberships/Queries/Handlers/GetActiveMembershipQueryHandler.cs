@@ -1,12 +1,12 @@
 using AutoMapper;
-using GymManagement.Application._Features.Memberships.Queries.Models;
+using GymManagement.Application.Features.Memberships.Queries.Models;
 using GymManagement.Application.Common.DTOs;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
 using GymManagement.Domain.Results;
 using MediatR;
 
-namespace GymManagement.Application._Features.Memberships.Queries.Handlers;
+namespace GymManagement.Application.Features.Memberships.Queries.Handlers;
 
 public class GetActiveMembershipQueryHandler(IUnitOfWork uow, IMapper mapper)
     : IRequestHandler<GetActiveMembershipQuery, Result<MembershipDto>>

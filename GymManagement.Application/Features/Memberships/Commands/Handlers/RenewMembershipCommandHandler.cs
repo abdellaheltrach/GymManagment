@@ -1,11 +1,11 @@
-using GymManagement.Application._Features.Memberships.Commands.Models;
+using GymManagement.Application.Features.Memberships.Commands.Models;
 using GymManagement.Domain.Entities;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
 using GymManagement.Domain.Results;
 using MediatR;
 
-namespace GymManagement.Application._Features.Memberships.Commands.Handlers;
+namespace GymManagement.Application.Features.Memberships.Commands.Handlers;
 
 public class RenewMembershipCommandHandler(IUnitOfWork uow) : IRequestHandler<RenewMembershipCommand, Result<Guid>>
 {

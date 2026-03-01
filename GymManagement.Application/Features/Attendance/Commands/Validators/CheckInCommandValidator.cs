@@ -1,7 +1,7 @@
 using FluentValidation;
-using GymManagement.Application._Features.Attendance.Commands.Models;
+using GymManagement.Application.Features.Attendance.Commands.Models;
 
-namespace GymManagement.Application._Features.Attendance.Commands.Validators;
+namespace GymManagement.Application.Features.Attendance.Commands.Validators;
 
 public class CheckInCommandValidator : AbstractValidator<CheckInCommand>
 {

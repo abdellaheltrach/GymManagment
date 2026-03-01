@@ -1,4 +1,4 @@
-using GymManagement.Application._Features.Dashboard.Queries.Models;
+using GymManagement.Application.Features.Dashboard.Queries.Models;
 using GymManagement.Application.Common.DTOs;
 using GymManagement.Domain.Common;
 using GymManagement.Domain.Enums;
@@ -7,7 +7,7 @@ using GymManagement.Domain.Results;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace GymManagement.Application._Features.Dashboard.Queries.Handlers;
+namespace GymManagement.Application.Features.Dashboard.Queries.Handlers;
 
 public class GetAdminDashboardQueryHandler(IUnitOfWork uow, IMemoryCache cache)
     : IRequestHandler<GetAdminDashboardQuery, Result<AdminDashboardDto>>

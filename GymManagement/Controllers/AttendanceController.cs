@@ -1,4 +1,4 @@
-﻿using GymManagement.Application._Features.Attendance.Commands.Models;
+﻿using GymManagement.Application.Features.Attendance.Commands.Models;
 using GymManagement.Domain.Enums;
 using GymManagement.Web.Bases;
 using GymManagement.Web.Extensions;

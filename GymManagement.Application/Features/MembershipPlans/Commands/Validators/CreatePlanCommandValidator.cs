@@ -1,7 +1,7 @@
 using FluentValidation;
-using GymManagement.Application._Features.MembershipPlans.Commands.Models;
+using GymManagement.Application.Features.MembershipPlans.Commands.Models;
 
-namespace GymManagement.Application._Features.MembershipPlans.Commands.Validators;
+namespace GymManagement.Application.Features.MembershipPlans.Commands.Validators;
 
 public class CreatePlanCommandValidator : AbstractValidator<CreatePlanCommand>
 {

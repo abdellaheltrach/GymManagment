@@ -1,9 +1,9 @@
-using GymManagement.Application._Features.Trainees.Commands.Models;
+using GymManagement.Application.Features.Trainees.Commands.Models;
 using GymManagement.Domain.Interfaces;
 using GymManagement.Domain.Results;
 using MediatR;
 
-namespace GymManagement.Application._Features.Trainees.Commands.Handlers;
+namespace GymManagement.Application.Features.Trainees.Commands.Handlers;
 
 public class DeleteTraineeCommandHandler(IUnitOfWork uow) : IRequestHandler<DeleteTraineeCommand, Result>
 {

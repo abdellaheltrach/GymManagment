@@ -45,5 +45,16 @@ namespace GymManagement.Infrastructure.Identity
         {
             return await userManager.FindByEmailAsync(email) != null;
         }
+
+        public async Task<Result> DeleteUserAsync(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user is null) return Result.Success(); // already gone, nothing to do
+
+            var result = await userManager.DeleteAsync(user);
+            return result.Succeeded
+                ? Result.Success()
+                : Result.Failure(string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
     }
 }

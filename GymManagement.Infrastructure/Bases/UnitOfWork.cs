@@ -1,6 +1,7 @@
 ﻿using GymManagement.Domain.Entities;
 using GymManagement.Domain.Interfaces;
 using GymManagement.Infrastructure.Context;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace GymManagement.Infrastructure.Bases
@@ -44,6 +45,30 @@ namespace GymManagement.Infrastructure.Bases
         // ── Persistence ────────────────────────────────────────────────────────
         public async Task<int> SaveChangesAsync(CancellationToken ct = default)
             => await _context.SaveChangesAsync(ct);
+
+        public async Task ExecuteInTransactionAsync(
+            Func<CancellationToken, Task> operation,
+            CancellationToken ct = default)
+        {
+            var strategy = _context.Database.CreateExecutionStrategy();
+
+            await strategy.ExecuteAsync(async cancellationToken =>
+            {
+                await using var tx =
+                    await _context.Database.BeginTransactionAsync(cancellationToken);
+                try
+                {
+                    await operation(cancellationToken);
+                    await _context.SaveChangesAsync(cancellationToken);
+                    await tx.CommitAsync(cancellationToken);
+                }
+                catch
+                {
+                    await tx.RollbackAsync(cancellationToken);
+                    throw;
+                }
+            }, ct);
+        }
 
         // ── Transaction management ─────────────────────────────────────────────
         public async Task BeginTransactionAsync(CancellationToken ct = default)

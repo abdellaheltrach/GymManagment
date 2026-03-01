@@ -1,7 +1,7 @@
 using GymManagement.Application.Common.Behaviours;
 using GymManagement.Domain.Enums;
 
-namespace GymManagement.Application._Features.Attendance.Commands.Models;
+namespace GymManagement.Application.Features.Attendance.Commands.Models;
 
 public record CheckInCommand(
     Guid TraineeId,

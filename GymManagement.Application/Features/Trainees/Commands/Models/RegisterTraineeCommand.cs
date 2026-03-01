@@ -1,7 +1,7 @@
 using GymManagement.Application.Common.Behaviours;
 using GymManagement.Domain.Enums;
 
-namespace GymManagement.Application._Features.Trainees.Commands.Models;
+namespace GymManagement.Application.Features.Trainees.Commands.Models;
 
 public record RegisterTraineeCommand(
     string FirstName,

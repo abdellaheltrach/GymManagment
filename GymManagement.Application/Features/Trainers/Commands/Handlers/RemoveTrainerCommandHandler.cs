@@ -1,9 +1,9 @@
-using GymManagement.Application._Features.Trainers.Commands.Models;
+using GymManagement.Application.Features.Trainers.Commands.Models;
 using GymManagement.Domain.Interfaces;
 using GymManagement.Domain.Results;
 using MediatR;
 
-namespace GymManagement.Application._Features.Trainers.Commands.Handlers;
+namespace GymManagement.Application.Features.Trainers.Commands.Handlers;
 
 public class RemoveTrainerCommandHandler(IUnitOfWork uow) : IRequestHandler<RemoveTrainerCommand, Result>
 {
@@ -21,7 +21,7 @@ public class RemoveTrainerCommandHandler(IUnitOfWork uow) : IRequestHandler<Remo
         assignment.RemovalReason = cmd.Reason;
 
         uow.TrainerAssignments.Update(assignment);
-        await uow.SaveChangesAsync(ct);
+
 
         return Result.Success();
     }

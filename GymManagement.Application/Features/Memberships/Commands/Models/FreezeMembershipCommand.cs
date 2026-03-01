@@ -1,6 +1,6 @@
 using GymManagement.Application.Common.Behaviours;
 
-namespace GymManagement.Application._Features.Memberships.Commands.Models;
+namespace GymManagement.Application.Features.Memberships.Commands.Models;
 
 public record FreezeMembershipCommand(
     Guid MembershipId,

@@ -1,10 +1,10 @@
-using GymManagement.Application._Features.Progress.Commands.Models;
+using GymManagement.Application.Features.Progress.Commands.Models;
 using GymManagement.Domain.Entities;
 using GymManagement.Domain.Interfaces;
 using GymManagement.Domain.Results;
 using MediatR;
 
-namespace GymManagement.Application._Features.Progress.Commands.Handlers;
+namespace GymManagement.Application.Features.Progress.Commands.Handlers;
 
 public class RecordProgressCommandHandler(IUnitOfWork uow) : IRequestHandler<RecordProgressCommand, Result<Guid>>
 {

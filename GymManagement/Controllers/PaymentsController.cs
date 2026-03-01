@@ -1,6 +1,8 @@
-﻿using GymManagement.Application._Features.Memberships.Queries.Models;
-using GymManagement.Application._Features.Payments.Commands.Models;
-using GymManagement.Application._Features.Trainees.Queries.Models;
+﻿
+using GymManagement.Application.Features.Memberships.Queries.Models;
+using GymManagement.Application.Features.Payments.Commands.Models;
+using GymManagement.Application.Features.Trainees.Queries.Models;
+using GymManagement.Domain.Enums;
 using GymManagement.Web.Bases;
 using GymManagement.Web.Extensions;
 using GymManagement.Web.ViewModels.Memberships;
@@ -21,7 +23,7 @@ public class PaymentsController : BaseController
         // can quickly find who needs to pay
         var result = await Mediator.Send(
             new GetTraineesListQuery(1, 50, null,
-                GymManagement.Domain.Enums.MembershipStatus.PendingPayment), ct);
+                MembershipStatus.PendingPayment), ct);
 
         return HandleResult(result, paged => View(paged.Items));
     }

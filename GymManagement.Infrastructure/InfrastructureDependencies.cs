@@ -6,6 +6,7 @@ using GymManagement.Infrastructure.Interceptors;
 using GymManagement.Infrastructure.Jobs;
 using GymManagement.Infrastructure.Persistence;
 using GymManagement.Infrastructure.Identity;
+using GymManagement.Infrastructure.Persistence.Identity;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Identity;
@@ -73,7 +74,8 @@ namespace GymManagement.Infrastructure
                 options.User.RequireUniqueEmail = true;
                 options.SignIn.RequireConfirmedEmail = false; // Set true once email is configured
             })
-            .AddEntityFrameworkStores<AppDbContext>()
+            .AddUserStore<NoSaveUserStore>()
+            .AddRoleStore<NoSaveRoleStore>()
             .AddDefaultTokenProviders();
 
             // ── Repository & Unit of Work ──────────────────────────────────────

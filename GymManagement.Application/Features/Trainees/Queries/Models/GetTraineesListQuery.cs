@@ -3,7 +3,7 @@ using GymManagement.Application.Common.DTOs;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Results;
 
-namespace GymManagement.Application._Features.Trainees.Queries.Models;
+namespace GymManagement.Application.Features.Trainees.Queries.Models;
 
 public record GetTraineesListQuery(
     int Page = 1,

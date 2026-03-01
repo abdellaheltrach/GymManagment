@@ -1,6 +1,6 @@
 using GymManagement.Application.Common.Behaviours;
 
-namespace GymManagement.Application._Features.Progress.Commands.Models;
+namespace GymManagement.Application.Features.Progress.Commands.Models;
 
 public record RecordProgressCommand(
     Guid TraineeId,

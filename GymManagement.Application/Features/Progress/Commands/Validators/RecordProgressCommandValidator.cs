@@ -1,7 +1,7 @@
 using FluentValidation;
-using GymManagement.Application._Features.Progress.Commands.Models;
+using GymManagement.Application.Features.Progress.Commands.Models;
 
-namespace GymManagement.Application._Features.Progress.Commands.Validators;
+namespace GymManagement.Application.Features.Progress.Commands.Validators;
 
 public class RecordProgressCommandValidator : AbstractValidator<RecordProgressCommand>
 {

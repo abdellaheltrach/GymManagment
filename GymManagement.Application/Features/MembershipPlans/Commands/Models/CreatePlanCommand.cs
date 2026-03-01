@@ -1,7 +1,7 @@
 using GymManagement.Application.Common.Behaviours;
 using GymManagement.Domain.Enums;
 
-namespace GymManagement.Application._Features.MembershipPlans.Commands.Models;
+namespace GymManagement.Application.Features.MembershipPlans.Commands.Models;
 
 public record CreatePlanCommand(
     string Name,

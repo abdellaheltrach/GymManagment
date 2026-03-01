@@ -1,10 +1,10 @@
-using GymManagement.Application._Features.Attendance.Commands.Models;
+using GymManagement.Application.Features.Attendance.Commands.Models;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
 using GymManagement.Domain.Results;
 using MediatR;
 
-namespace GymManagement.Application._Features.Attendance.Commands.Handlers;
+namespace GymManagement.Application.Features.Attendance.Commands.Handlers;
 
 public class CheckInCommandHandler(IUnitOfWork uow) : IRequestHandler<CheckInCommand, Result<Guid>>
 {

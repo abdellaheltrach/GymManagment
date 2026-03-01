@@ -1,7 +1,7 @@
-﻿using GymManagement.Application._Features.MembershipPlans.Queries.Models;
-using GymManagement.Application._Features.Memberships.Commands.Models;
-using GymManagement.Application._Features.Memberships.Queries.Models;
-using GymManagement.Application._Features.Trainees.Queries.Models;
+﻿using GymManagement.Application.Features.MembershipPlans.Queries.Models;
+using GymManagement.Application.Features.Memberships.Commands.Models;
+using GymManagement.Application.Features.Memberships.Queries.Models;
+using GymManagement.Application.Features.Trainees.Queries.Models;
 using GymManagement.Domain.Enums;
 using GymManagement.Web.Bases;
 using GymManagement.Web.Extensions;

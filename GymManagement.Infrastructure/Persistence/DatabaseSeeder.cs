@@ -22,9 +22,12 @@ namespace GymManagement.Infrastructure.Persistence
     {
         public async Task SeedAsync()
         {
-            await SeedRolesAsync();
-            await SeedAdminUserAsync();
-            await SeedMembershipPlansAsync();
+            await uow.ExecuteInTransactionAsync(async _ =>
+            {
+                await SeedRolesAsync();
+                await SeedAdminUserAsync();
+                await SeedMembershipPlansAsync();
+            });
         }
 
         private async Task SeedRolesAsync()
@@ -36,7 +39,7 @@ namespace GymManagement.Infrastructure.Persistence
                 if (!await roleManager.RoleExistsAsync(role))
                 {
                     await roleManager.CreateAsync(new IdentityRole(role));
-                    logger.LogInformation("Seeded role: {Role}", role);
+                    logger.LogInformation("Added role to tracker: {Role}", role);
                 }
             }
         }
@@ -64,15 +67,16 @@ namespace GymManagement.Infrastructure.Persistence
             };
 
             var result = await userManager.CreateAsync(seedAdmin, password);
+
             if (!result.Succeeded)
             {
-                logger.LogError("Failed to create admin user: {Errors}",
+                logger.LogError("Failed to prepare admin user: {Errors}",
                     string.Join(", ", result.Errors.Select(e => e.Description)));
                 return;
             }
 
             await userManager.AddToRoleAsync(seedAdmin, "Admin");
-            logger.LogInformation("Seeded admin user: {Email}", adminEmail);
+            logger.LogInformation("Prepared admin user with role: {Email}", adminEmail);
         }
 
         private async Task SeedMembershipPlansAsync()
@@ -131,8 +135,7 @@ namespace GymManagement.Infrastructure.Persistence
             foreach (var plan in plans)
                 await uow.MembershipPlans.AddAsync(plan);
 
-            await uow.SaveChangesAsync();
-            logger.LogInformation("Seeded {Count} membership plans.", plans.Length);
+            logger.LogInformation("Added {Count} membership plans to tracker.", plans.Length);
         }
     }
 }

@@ -1,5 +1,6 @@
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Results;
+using GymManagement.Application.Common.Behaviours;
 using MediatR;
 
 namespace GymManagement.Application.Features.Trainers.Commands.Models
@@ -17,5 +18,5 @@ namespace GymManagement.Application.Features.Trainers.Commands.Models
         decimal? BaseSalary,
         decimal? CommissionPerTrainee,
         string Password,
-        string? CreatedById = null) : IRequest<Result<Guid>>;
+        string? CreatedById = null) : ICommand<Guid>;
 }

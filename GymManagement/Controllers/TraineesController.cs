@@ -1,5 +1,5 @@
-﻿using GymManagement.Application._Features.Trainees.Commands.Models;
-using GymManagement.Application._Features.Trainees.Queries.Models;
+﻿using GymManagement.Application.Features.Trainees.Commands.Models;
+using GymManagement.Application.Features.Trainees.Queries.Models;
 using GymManagement.Domain.Enums;
 using GymManagement.Web.Bases;
 using GymManagement.Web.Extensions;

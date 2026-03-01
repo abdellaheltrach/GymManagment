@@ -1,11 +1,11 @@
-using GymManagement.Application._Features.Trainees.Queries.Models;
+using GymManagement.Application.Features.Trainees.Queries.Models;
 using GymManagement.Application.Common.DTOs;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
 using GymManagement.Domain.Results;
 using MediatR;
 
-namespace GymManagement.Application._Features.Trainees.Queries.Handlers;
+namespace GymManagement.Application.Features.Trainees.Queries.Handlers;
 
 public class GetTraineesListQueryHandler(IUnitOfWork uow)
     : IRequestHandler<GetTraineesListQuery, Result<PagedResult<TraineeSummaryDto>>>

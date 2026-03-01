@@ -1,7 +1,7 @@
 using FluentValidation;
-using GymManagement.Application._Features.Payments.Commands.Models;
+using GymManagement.Application.Features.Payments.Commands.Models;
 
-namespace GymManagement.Application._Features.Payments.Commands.Validators;
+namespace GymManagement.Application.Features.Payments.Commands.Validators;
 
 public class RefundPaymentCommandValidator : AbstractValidator<RefundPaymentCommand>
 {

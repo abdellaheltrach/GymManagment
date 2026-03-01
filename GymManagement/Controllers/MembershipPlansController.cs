@@ -1,5 +1,6 @@
-﻿using GymManagement.Application._Features.MembershipPlans.Commands.Models;
-using GymManagement.Application._Features.MembershipPlans.Queries.Models;
+﻿
+using GymManagement.Application.Features.MembershipPlans.Commands.Models;
+using GymManagement.Application.Features.MembershipPlans.Queries.Models;
 using GymManagement.Web.Bases;
 using GymManagement.Web.ViewModels.MembershipPlans;
 using Microsoft.AspNetCore.Authorization;

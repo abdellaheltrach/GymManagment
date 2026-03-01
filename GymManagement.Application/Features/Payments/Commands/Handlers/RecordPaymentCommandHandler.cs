@@ -1,11 +1,11 @@
-using GymManagement.Application._Features.Payments.Commands.Models;
+using GymManagement.Application.Features.Payments.Commands.Models;
 using GymManagement.Domain.Entities;
 using GymManagement.Domain.Enums;
 using GymManagement.Domain.Interfaces;
 using GymManagement.Domain.Results;
 using MediatR;
 
-namespace GymManagement.Application._Features.Payments.Commands.Handlers;
+namespace GymManagement.Application.Features.Payments.Commands.Handlers;
 
 public class RecordPaymentCommandHandler(IUnitOfWork uow) : IRequestHandler<RecordPaymentCommand, Result<Guid>>
 {

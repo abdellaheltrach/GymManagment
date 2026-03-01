@@ -77,7 +77,9 @@ namespace GymManagement.Web.Controllers
 
             return RedirectWithSuccess(
                 $"Trainer {vm.FirstName} {vm.LastName} registered successfully.",
-                nameof(Details), new { id = result.Value });
+                nameof(Details),
+                new { id = result.Value },
+                "Trainers");
         }
     }
 }

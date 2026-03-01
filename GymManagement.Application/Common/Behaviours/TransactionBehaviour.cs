@@ -1,6 +1,5 @@
 
 using GymManagement.Domain.Interfaces;
-using GymManagement.Infrastructure.Context;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -18,22 +17,20 @@ public class TransactionBehaviour<TRequest, TResponse>
     where TRequest : notnull
 {
     private readonly IUnitOfWork _uow;
-    private readonly AppDbContext _context;
     private readonly ILogger<TransactionBehaviour<TRequest, TResponse>> _logger;
 
     public TransactionBehaviour(
         IUnitOfWork uow,
-        ILogger<TransactionBehaviour<TRequest, TResponse>> logger,
-        AppDbContext context)
+        ILogger<TransactionBehaviour<TRequest, TResponse>> logger)
     {
-        _uow = uow;
+        _uow    = uow;
         _logger = logger;
-        _context = context;
     }
+
     public async Task<TResponse> Handle(
-    TRequest request,
-    RequestHandlerDelegate<TResponse> next,
-    CancellationToken ct)
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken ct)
     {
         if (request is not ICommandBase)
             return await next();
@@ -41,27 +38,11 @@ public class TransactionBehaviour<TRequest, TResponse>
         var requestName = typeof(TRequest).Name;
         TResponse response = default!;
 
-        var strategy = _context.Database.CreateExecutionStrategy();
-
-        await strategy.ExecuteAsync(async cancellationToken =>
+        await _uow.ExecuteInTransactionAsync(async cancellationToken =>
         {
-            await using var tx = await _context.Database.BeginTransactionAsync(cancellationToken);
-            try
-            {
-                response = await next();
-                await _context.SaveChangesAsync(cancellationToken);
-                await tx.CommitAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                await tx.RollbackAsync(cancellationToken);
-                _logger.LogError(ex, "Rolled back transaction for {RequestName}", requestName);
-
-                throw;
-            }
+            response = await next();
         }, ct);
 
         return response;
     }
-
 }

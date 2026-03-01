@@ -1,7 +1,7 @@
 using FluentValidation;
-using GymManagement.Application._Features.Trainees.Commands.Models;
+using GymManagement.Application.Features.Trainees.Commands.Models;
 
-namespace GymManagement.Application._Features.Trainees.Commands.Validators;
+namespace GymManagement.Application.Features.Trainees.Commands.Validators;
 
 public class UpdateTraineeCommandValidator : AbstractValidator<UpdateTraineeCommand>
 {

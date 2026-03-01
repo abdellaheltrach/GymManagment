@@ -22,6 +22,10 @@ public interface IUnitOfWork : IDisposable
     // ── Persistence ────────────────────────────────────────────────────────
     public Task<int> SaveChangesAsync(CancellationToken ct = default);
 
+    Task ExecuteInTransactionAsync(
+        Func<CancellationToken, Task> operation,
+        CancellationToken ct = default);
+
     // ── Transaction management ─────────────────────────────────────────────
     public Task BeginTransactionAsync(CancellationToken ct = default);
 

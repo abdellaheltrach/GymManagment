@@ -1,7 +1,7 @@
 using FluentValidation;
-using GymManagement.Application._Features.Trainers.Commands.Models;
+using GymManagement.Application.Features.Trainers.Commands.Models;
 
-namespace GymManagement.Application._Features.Trainers.Commands.Validators;
+namespace GymManagement.Application.Features.Trainers.Commands.Validators;
 
 public class AssignTrainerCommandValidator : AbstractValidator<AssignTrainerCommand>
 {

@@ -1,7 +1,7 @@
 using FluentValidation;
-using GymManagement.Application._Features.Memberships.Commands.Models;
+using GymManagement.Application.Features.Memberships.Commands.Models;
 
-namespace GymManagement.Application._Features.Memberships.Commands.Validators;
+namespace GymManagement.Application.Features.Memberships.Commands.Validators;
 
 public class RenewMembershipCommandValidator : AbstractValidator<RenewMembershipCommand>
 {

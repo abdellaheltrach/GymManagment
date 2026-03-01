@@ -1,7 +1,7 @@
 using GymManagement.Application.Common.Behaviours;
 using GymManagement.Domain.Enums;
 
-namespace GymManagement.Application._Features.Memberships.Commands.Models;
+namespace GymManagement.Application.Features.Memberships.Commands.Models;
 
 public record AssignMembershipCommand(
     Guid TraineeId,

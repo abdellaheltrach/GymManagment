@@ -59,9 +59,21 @@ namespace GymManagement.Web.Bases
                 : RedirectToAction(action);
         }
 
-        protected IActionResult RedirectWithSuccess(string message, string action, object? routeValues = null)
+        protected IActionResult RedirectWithSuccess(
+            string message,
+            string action,
+            object? routeValues = null,
+            string? controller = null)
         {
             TempData["Success"] = message;
+
+            if (controller is not null)
+            {
+                return routeValues is not null
+                    ? RedirectToAction(action, controller, routeValues)
+                    : RedirectToAction(action, controller);
+            }
+
             return routeValues is not null
                 ? RedirectToAction(action, routeValues)
                 : RedirectToAction(action);
