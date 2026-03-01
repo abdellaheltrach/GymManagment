@@ -56,7 +56,9 @@ public class GetTraineesListQueryHandler(IUnitOfWork uow)
             m => paged.Select(t => t.Id).Contains(m.TraineeId) &&
                  m.Status == MembershipStatus.Active, ct);
 
-        var membershipMap = membershipsAll.ToDictionary(m => m.TraineeId);
+        var membershipMap = membershipsAll
+            .GroupBy(m => m.TraineeId)
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(m => m.EndDate).First());
 
         var dtos = paged.Select(t =>
         {

@@ -32,7 +32,9 @@ public class RecordPaymentCommandHandler(IUnitOfWork uow) : IRequestHandler<Reco
             MembershipId = cmd.MembershipId,
             Amount = cmd.Amount,
             Method = cmd.Method,
-            Status = PaymentStatus.Paid,
+            Status = (membership.AmountPaid + cmd.Amount >= membership.TotalAmount) 
+                ? PaymentStatus.Paid 
+                : PaymentStatus.PartiallyPaid,
             RecordedById = cmd.RecordedById,
             Notes = cmd.Notes,
             ReferenceNumber = $"PAY-{Guid.NewGuid():N}"[..12].ToUpper()

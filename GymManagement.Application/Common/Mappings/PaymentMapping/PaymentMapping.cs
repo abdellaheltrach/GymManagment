@@ -11,9 +11,11 @@ public partial class MappingProfile
             .ConstructUsing((src, ctx) => new PaymentDto(
                 src.Id,
                 src.MembershipId,
+                src.Membership?.TraineeId ?? Guid.Empty,
                 src.Membership?.Trainee?.FullName ?? "Unknown Trainee",
                 src.Membership?.Plan?.Name ?? "Unknown Plan",
                 src.Amount,
+                src.Membership?.RemainingBalance ?? 0,
                 src.Method,
                 src.Status,
                 src.PaidAt,

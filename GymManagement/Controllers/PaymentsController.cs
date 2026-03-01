@@ -16,14 +16,63 @@ namespace GymManagement.Web.Controllers;
 public class PaymentsController : BaseController
 {
     // ── Index ──────────────────────────────────────────────────────────────────
-    // GET /Payments  — lists all payment records with optional method filtering
+    // GET /Payments  — lists all payment records with filters
     [HttpGet]
-    public async Task<IActionResult> Index(int page = 1, PaymentMethod? method = null, CancellationToken ct = default)
+    public async Task<IActionResult> Index(
+        int page = 1, 
+        string? searchTerm = null,
+        PaymentMethod? method = null, 
+        PaymentStatus? status = null,
+        CancellationToken ct = default)
     {
-        var result = await Mediator.Send(new GetPaymentsListQuery(page, 20, method), ct);
+        var result = await Mediator.Send(new GetPaymentsListQuery(page, 20, searchTerm, method, status), ct);
 
+        ViewBag.CurrentSearch = searchTerm;
         ViewBag.CurrentMethod = method;
+        ViewBag.CurrentStatus = status;
+        
         return HandleResult(result, paged => View(paged));
+    }
+
+    // ── Update GET ─────────────────────────────────────────────────────────────
+    [HttpGet]
+    public async Task<IActionResult> Update(Guid id, CancellationToken ct)
+    {
+        var result = await Mediator.Send(new GetPaymentByIdQuery(id), ct);
+
+        return HandleResult(result, p => View(new UpdatePaymentViewModel
+        {
+            PaymentId = p.Id,
+            TraineeName = p.TraineeName,
+            PlanName = p.PlanName,
+            TotalAmount = p.Amount + p.RemainingBalance, // Total amount is Paid + Balance
+            AlreadyPaid = p.Amount,
+            RemainingBalance = p.RemainingBalance,
+            Method = p.Method,
+            AdditionalAmount = p.RemainingBalance 
+        }));
+    }
+
+    // ── Update POST ────────────────────────────────────────────────────────────
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Update(UpdatePaymentViewModel vm, CancellationToken ct)
+    {
+        if (!ModelState.IsValid) return View(vm);
+
+        var result = await Mediator.Send(new UpdatePaymentCommand(
+            vm.PaymentId, vm.AdditionalAmount, vm.Method,
+            User.GetUserId(), vm.Notes), ct);
+
+        if (result.IsFailure)
+        {
+            ModelState.AddModelError(string.Empty, result.Error!);
+            return View(vm);
+        }
+
+        return RedirectWithSuccess(
+            $"Payment updated. Additional {vm.AdditionalAmount:C} recorded.",
+            "Index");
     }
 
     // ── Record GET ─────────────────────────────────────────────────────────────

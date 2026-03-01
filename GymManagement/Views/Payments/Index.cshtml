@@ -3,7 +3,9 @@
 @model PagedResult<GymManagement.Application.Common.DTOs.PaymentDto>
 @{
     ViewData["Title"] = "Payment History";
+    var currentSearch = ViewBag.CurrentSearch as string;
     var currentMethod = ViewBag.CurrentMethod as PaymentMethod?;
+    var currentStatus = ViewBag.CurrentStatus as PaymentStatus?;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -13,21 +15,29 @@
     </div>
     <div class="d-flex gap-2">
         <form method="get" class="d-flex gap-2 align-items-center">
+            <input type="text" name="searchTerm" value="@currentSearch" class="form-control form-control-sm" placeholder="Search trainee or email..." style="width: 250px;" />
+            
+            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">All Statuses</option>
+                @foreach (var status in Enum.GetValues<PaymentStatus>())
+                {
+                    <option value="@status" selected="@(currentStatus == status)">@status</option>
+                }
+            </select>
+
             <select name="method" class="form-select form-select-sm" onchange="this.form.submit()">
                 <option value="">All Methods</option>
                 @foreach (var method in Enum.GetValues<PaymentMethod>())
                 {
-                    @if (currentMethod == method)
-                    {
-                        <option value="@method" selected>@method</option>
-                    }
-                    else
-                    {
-                        <option value="@method">@method</option>
-                    }
+                    <option value="@method" selected="@(currentMethod == method)">@method</option>
                 }
             </select>
-            @if (currentMethod.HasValue)
+            
+            <button type="submit" class="btn btn-sm btn-primary">
+                <i class="bi bi-search"></i>
+            </button>
+
+            @if (currentMethod.HasValue || currentStatus.HasValue || !string.IsNullOrEmpty(currentSearch))
             {
                 <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Clear</a>
             }
@@ -43,8 +53,8 @@
                     <th>Date</th>
                     <th>Trainee</th>
                     <th>Plan</th>
-                    <th>Amount</th>
-                    <th>Method</th>
+                    <th>Paid</th>
+                    <th>Balance</th>
                     <th>Status</th>
                     <th class="text-end">Action</th>
                 </tr>
@@ -53,47 +63,56 @@
                 @foreach (var p in Model.Items)
                 {
                     <tr class="@(p.IsRefunded ? "table-light opacity-75" : "")">
-                        <td class="small">@p.PaidAt.ToString("dd MMM yyyy HH:mm")</td>
+                        <td class="small">@p.PaidAt.ToString("dd MMM yyyy")</td>
                         <td class="fw-semibold">@p.TraineeName</td>
                         <td class="text-muted small">@p.PlanName</td>
                         <td class="fw-bold @(p.IsRefunded ? "text-decoration-line-through text-muted" : "text-dark")">
                             @p.Amount.ToString("C")
                         </td>
-                        <td>
-                            <span class="badge bg-light text-dark border">
-                                <i class="bi @(p.Method == PaymentMethod.Cash ? "bi-cash" : p.Method == PaymentMethod.Card ? "bi-credit-card" : "bi-bank") me-1"></i>
-                                @p.Method
-                            </span>
+                        <td class="small @(p.RemainingBalance > 0 ? "text-danger fw-bold" : "text-success")">
+                            @(p.RemainingBalance > 0 ? p.RemainingBalance.ToString("C") : "Fully Paid")
                         </td>
                         <td>
                             @if (p.IsRefunded)
                             {
                                 <span class="badge bg-danger">Refunded</span>
                             }
+                            else if (p.Status == PaymentStatus.PartiallyPaid)
+                            {
+                                <span class="badge bg-warning text-dark">Partial</span>
+                            }
                             else
                             {
-                                <span class="badge bg-success">@p.Status</span>
+                                <span class="badge bg-success">Paid</span>
                             }
                         </td>
-                        <td class="text-muted small">@(p.ReferenceNumber ?? "—")</td>
                         <td class="text-end">
-                            @if (!p.IsRefunded && User.IsInRole("Admin"))
-                            {
-                                <form asp-action="Refund" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to refund this payment?')">
-                                    <input type="hidden" name="paymentId" value="@p.Id" />
-                                    <input type="hidden" name="reason" value="User requested refund" />
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        Refund
-                                    </button>
-                                </form>
-                            }
+                            <div class="btn-group">
+                                @if (!p.IsRefunded && (p.Status == PaymentStatus.PartiallyPaid || p.RemainingBalance > 0))
+                                {
+                                    <a asp-action="Update" asp-route-id="@p.Id" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-plus-lg"></i> Pay
+                                    </a>
+                                }
+
+                                @if (!p.IsRefunded && User.IsInRole("Admin"))
+                                {
+                                    <form asp-action="Refund" method="post" class="d-inline" onsubmit="return confirm('Refund this payment?')">
+                                        <input type="hidden" name="paymentId" value="@p.Id" />
+                                        <input type="hidden" name="reason" value="User requested refund" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            Refund
+                                        </button>
+                                    </form>
+                                }
+                            </div>
                         </td>
                     </tr>
                 }
                 @if (!Model.Items.Any())
                 {
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-5">
+                        <td colspan="7" class="text-center text-muted py-5">
                             <i class="bi bi-receipt fs-2 d-block mb-2"></i>
                             No payment records found.
                         </td>
@@ -111,7 +130,11 @@
                     @for (int i = 1; i <= Model.TotalPages; i++)
                     {
                         <li class="page-item @(i == Model.Page ? "active" : "")">
-                            <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-method="@currentMethod">@i</a>
+                            <a class="page-link" asp-action="Index" 
+                               asp-route-page="@i" 
+                               asp-route-searchTerm="@currentSearch"
+                               asp-route-method="@currentMethod"
+                               asp-route-status="@currentStatus">@i</a>
                         </li>
                     }
                 </ul>

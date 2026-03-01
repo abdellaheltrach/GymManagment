@@ -20,9 +20,23 @@ public class GetPaymentsListQueryHandler(IUnitOfWork uow, IMapper mapper)
             .Include(p => p.Membership)
                 .ThenInclude(m => m.Plan);
 
+        if (!string.IsNullOrWhiteSpace(query.SearchTerm))
+        {
+            var term = query.SearchTerm.ToLower();
+            paymentsQuery = paymentsQuery.Where(p => 
+                p.Membership.Trainee.FirstName.ToLower().Contains(term) ||
+                p.Membership.Trainee.LastName.ToLower().Contains(term) ||
+                p.Membership.Trainee.Email.ToLower().Contains(term));
+        }
+
         if (query.MethodFilter.HasValue)
         {
             paymentsQuery = paymentsQuery.Where(p => p.Method == query.MethodFilter.Value);
+        }
+
+        if (query.StatusFilter.HasValue)
+        {
+            paymentsQuery = paymentsQuery.Where(p => p.Status == query.StatusFilter.Value);
         }
 
         var totalCount = await paymentsQuery.CountAsync(ct);

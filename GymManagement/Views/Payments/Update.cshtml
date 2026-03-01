@@ -1,0 +1,82 @@
+@using GymManagement.Domain.Enums
+@model GymManagement.Web.ViewModels.Memberships.UpdatePaymentViewModel
+@{
+    ViewData["Title"] = "Update Payment";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0">Update Partial Payment</h5>
+                <p class="text-muted small mb-0">Add funds to complete the membership fee</p>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-4 p-3 bg-light rounded">
+                    <div class="row mb-2">
+                        <div class="col-6 text-muted small">Trainee</div>
+                        <div class="col-6 fw-semibold">@Model.TraineeName</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6 text-muted small">Plan</div>
+                        <div class="col-6 fw-semibold">@Model.PlanName</div>
+                    </div>
+                    <hr />
+                    <div class="row mb-1">
+                        <div class="col-6 text-muted small">Total Cost</div>
+                        <div class="col-6">@Model.TotalAmount.ToString("C")</div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col-6 text-muted small">Already Paid</div>
+                        <div class="col-6 text-success">@Model.AlreadyPaid.ToString("C")</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 fw-bold">Remaining Balance</div>
+                        <div class="col-6 fw-bold text-danger">@Model.RemainingBalance.ToString("C")</div>
+                    </div>
+                </div>
+
+                <form asp-action="Update" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+                    <input type="hidden" asp-for="PaymentId" />
+                    <input type="hidden" asp-for="TraineeName" />
+                    <input type="hidden" asp-for="PlanName" />
+                    <input type="hidden" asp-for="TotalAmount" />
+                    <input type="hidden" asp-for="AlreadyPaid" />
+                    <input type="hidden" asp-for="RemainingBalance" />
+
+                    <div class="mb-3">
+                        <label asp-for="AdditionalAmount" class="form-label small fw-bold text-uppercase"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input asp-for="AdditionalAmount" class="form-control" placeholder="0.00" step="0.01" />
+                        </div>
+                        <span asp-validation-for="AdditionalAmount" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Method" class="form-label small fw-bold text-uppercase"></label>
+                        <select asp-for="Method" class="form-select" asp-items="Html.GetEnumSelectList<PaymentMethod>()"></select>
+                        <span asp-validation-for="Method" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Notes" class="form-label small fw-bold text-uppercase"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary py-2">
+                            <i class="bi bi-check-circle me-1"></i> Confirm Payment
+                        </button>
+                        <a asp-action="Index" class="btn btn-link text-muted mb-0">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

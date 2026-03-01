@@ -8,5 +8,7 @@ namespace GymManagement.Application.Features.Payments.Queries.Models;
 public record GetPaymentsListQuery(
     int Page = 1,
     int PageSize = 20,
-    PaymentMethod? MethodFilter = null
+    string? SearchTerm = null,
+    PaymentMethod? MethodFilter = null,
+    PaymentStatus? StatusFilter = null
 ) : IQuery<PagedResult<PaymentDto>>;
