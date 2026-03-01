@@ -7,6 +7,8 @@ namespace GymManagement.Application.Common.DTOs;
 public record PaymentDto(
     Guid Id,
     Guid MembershipId,
+    string TraineeName,
+    string PlanName,
     decimal Amount,
     PaymentMethod Method,
     PaymentStatus Status,

@@ -1,11 +1,38 @@
-﻿@model IReadOnlyList<GymManagement.Application.Common.DTOs.TraineeSummaryDto>
+﻿@using GymManagement.Domain.Results
+@using GymManagement.Domain.Enums
+@model PagedResult<GymManagement.Application.Common.DTOs.PaymentDto>
 @{
-    ViewData["Title"] = "Payments";
+    ViewData["Title"] = "Payment History";
+    var currentMethod = ViewBag.CurrentMethod as PaymentMethod?;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0">Payments</h4>
-    <span class="text-muted small">Trainees with outstanding balance</span>
+    <div>
+        <h4 class="fw-bold mb-0">Payment History</h4>
+        <p class="text-muted small mb-0">Track and manage all gym payments</p>
+    </div>
+    <div class="d-flex gap-2">
+        <form method="get" class="d-flex gap-2 align-items-center">
+            <select name="method" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">All Methods</option>
+                @foreach (var method in Enum.GetValues<PaymentMethod>())
+                {
+                    @if (currentMethod == method)
+                    {
+                        <option value="@method" selected>@method</option>
+                    }
+                    else
+                    {
+                        <option value="@method">@method</option>
+                    }
+                }
+            </select>
+            @if (currentMethod.HasValue)
+            {
+                <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Clear</a>
+            }
+        </form>
+    </div>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -13,46 +40,82 @@
         <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
                 <tr>
+                    <th>Date</th>
                     <th>Trainee</th>
-                    <th>Email</th>
-                    <th>Membership Status</th>
-                    <th>Expires</th>
+                    <th>Plan</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Status</th>
                     <th class="text-end">Action</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var t in Model)
+                @foreach (var p in Model.Items)
                 {
-                    <tr>
-                        <td class="fw-semibold">@t.FullName</td>
-                        <td class="text-muted small">@t.Email</td>
+                    <tr class="@(p.IsRefunded ? "table-light opacity-75" : "")">
+                        <td class="small">@p.PaidAt.ToString("dd MMM yyyy HH:mm")</td>
+                        <td class="fw-semibold">@p.TraineeName</td>
+                        <td class="text-muted small">@p.PlanName</td>
+                        <td class="fw-bold @(p.IsRefunded ? "text-decoration-line-through text-muted" : "text-dark")">
+                            @p.Amount.ToString("C")
+                        </td>
                         <td>
-                            <span class="badge bg-warning text-dark">Pending Payment</span>
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi @(p.Method == PaymentMethod.Cash ? "bi-cash" : p.Method == PaymentMethod.Card ? "bi-credit-card" : "bi-bank") me-1"></i>
+                                @p.Method
+                            </span>
                         </td>
-                        <td class="small">
-                            @(t.MembershipEndDate.HasValue
-                                                    ? t.MembershipEndDate.Value.ToString("dd MMM yyyy")
-                                                    : "—")
+                        <td>
+                            @if (p.IsRefunded)
+                            {
+                                <span class="badge bg-danger">Refunded</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">@p.Status</span>
+                            }
                         </td>
+                        <td class="text-muted small">@(p.ReferenceNumber ?? "—")</td>
                         <td class="text-end">
-                            <a asp-controller="Payments" asp-action="Record"
-                               asp-route-traineeId="@t.Id"
-                               class="btn btn-sm btn-success">
-                                <i class="bi bi-cash me-1"></i> Record Payment
-                            </a>
+                            @if (!p.IsRefunded && User.IsInRole("Admin"))
+                            {
+                                <form asp-action="Refund" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to refund this payment?')">
+                                    <input type="hidden" name="paymentId" value="@p.Id" />
+                                    <input type="hidden" name="reason" value="User requested refund" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Refund
+                                    </button>
+                                </form>
+                            }
                         </td>
                     </tr>
                 }
-                @if (!Model.Any())
+                @if (!Model.Items.Any())
                 {
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-5">
-                            <i class="bi bi-check-circle fs-2 d-block mb-2 text-success"></i>
-                            No outstanding payments. All members are fully paid.
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="bi bi-receipt fs-2 d-block mb-2"></i>
+                            No payment records found.
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer bg-white border-top-0 py-3">
+            <nav>
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.Page ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-method="@currentMethod">@i</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
 </div>

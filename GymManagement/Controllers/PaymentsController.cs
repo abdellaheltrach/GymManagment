@@ -1,6 +1,7 @@
 ﻿
 using GymManagement.Application.Features.Memberships.Queries.Models;
 using GymManagement.Application.Features.Payments.Commands.Models;
+using GymManagement.Application.Features.Payments.Queries.Models;
 using GymManagement.Application.Features.Trainees.Queries.Models;
 using GymManagement.Domain.Enums;
 using GymManagement.Web.Bases;
@@ -15,17 +16,14 @@ namespace GymManagement.Web.Controllers;
 public class PaymentsController : BaseController
 {
     // ── Index ──────────────────────────────────────────────────────────────────
-    // GET /Payments  — lists trainees who have a pending payment balance
+    // GET /Payments  — lists all payment records with optional method filtering
     [HttpGet]
-    public async Task<IActionResult> Index(CancellationToken ct)
+    public async Task<IActionResult> Index(int page = 1, PaymentMethod? method = null, CancellationToken ct = default)
     {
-        // Show trainees with PendingPayment memberships so receptionist
-        // can quickly find who needs to pay
-        var result = await Mediator.Send(
-            new GetTraineesListQuery(1, 50, null,
-                MembershipStatus.PendingPayment), ct);
+        var result = await Mediator.Send(new GetPaymentsListQuery(page, 20, method), ct);
 
-        return HandleResult(result, paged => View(paged.Items));
+        ViewBag.CurrentMethod = method;
+        return HandleResult(result, paged => View(paged));
     }
 
     // ── Record GET ─────────────────────────────────────────────────────────────
@@ -92,8 +90,8 @@ public class PaymentsController : BaseController
             new RefundPaymentCommand(paymentId, reason, User.GetUserId()), ct);
 
         if (result.IsFailure)
-            return RedirectWithError(result.Error!, "Index", new { controller = "Trainees" });
+            return RedirectWithError(result.Error!, "Index");
 
-        return RedirectWithSuccess("Payment refunded.", "Index", new { controller = "Trainees" });
+        return RedirectWithSuccess("Payment refunded.", "Index");
     }
 }
