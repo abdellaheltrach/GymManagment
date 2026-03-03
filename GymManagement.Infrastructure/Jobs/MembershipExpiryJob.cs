@@ -13,11 +13,13 @@ namespace GymManagement.Infrastructure.Jobs
     public class MembershipExpiryJob
     {
         private readonly IUnitOfWork _uow;
+        private readonly IEmailService _emailService;
         private readonly ILogger<MembershipExpiryJob> _logger;
 
-        public MembershipExpiryJob(IUnitOfWork uow, ILogger<MembershipExpiryJob> logger)
+        public MembershipExpiryJob(IUnitOfWork uow, IEmailService emailService, ILogger<MembershipExpiryJob> logger)
         {
             _uow = uow;
+            _emailService = emailService;
             _logger = logger;
         }
 
@@ -64,6 +66,16 @@ namespace GymManagement.Infrastructure.Jobs
                              $"{membership.EndDate:dd MMM yyyy}. Renew now to avoid interruption.",
                     Type = NotificationType.MembershipExpirySoon,
                 });
+
+                // Send Email Notification
+                if (!string.IsNullOrEmpty(trainee.Email))
+                {
+                    await _emailService.SendAsync(
+                        to: trainee.Email,
+                        subject: "Your membership is expiring soon",
+                        body: $"Your membership expires in {daysLeft} day(s) on {membership.EndDate:dd MMM yyyy}."
+                    );
+                }
             }
 
             if (notifications.Count > 0)

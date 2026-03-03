@@ -35,6 +35,9 @@ namespace GymManagement.Infrastructure
             services.AddSingleton(cookieSettings);
             services.AddSingleton(emailSettings);
 
+            services.AddScoped<IEmailService, SmtpEmailService>();
+            services.AddMemoryCache();
+
             // ── Audit interceptor ──────────────────────────────────────────────
             // Registered as Singleton because interceptors are resolved once
             // and IHttpContextAccessor is thread-safe.
@@ -99,7 +102,7 @@ namespace GymManagement.Infrastructure
             services.AddScoped<IIdentityService, IdentityService>();
 
             // ── Memory cache (for RevenueReportJob) ───────────────────────────
-            services.AddMemoryCache();
+            // Already registered above
 
             // ── Hangfire ───────────────────────────────────────────────────────
             services.AddHangfire(config => config
