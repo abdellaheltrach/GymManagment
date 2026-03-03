@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore dependencies
+        run: dotnet restore GymManagement.sln
+
+      - name: Build
+        run: dotnet build GymManagement.sln --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test GymManagement.sln --no-build --configuration Release --verbosity normal
+
+      - name: Verify Docker build (dry run)
+        run: docker build -t gymmanagementweb:test .

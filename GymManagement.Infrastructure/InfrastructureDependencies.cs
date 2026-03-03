@@ -81,9 +81,6 @@ namespace GymManagement.Infrastructure
             // ── Repository & Unit of Work ──────────────────────────────────────
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            // ── Database Seeder ────────────────────────────────────────────────
-            services.AddScoped<DatabaseSeeder>();
-
             // ── Identity Service ──────────────────────────────────────────────
             services.AddScoped<IIdentityService, IdentityService>();
 

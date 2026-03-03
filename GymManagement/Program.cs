@@ -2,6 +2,10 @@ using GymManagement.Application.Extensions;
 using GymManagement.Infrastructure;
 using GymManagement.Infrastructure.Context;
 using GymManagement.Infrastructure.Persistence;
+using GymManagement.Infrastructure.Persistence.Seeders;
+using GymManagement.Domain.Entities.Identity;
+using GymManagement.Domain.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using GymManagement.Web.Filters;
 using GymManagement.Web.Middleware;
 using Hangfire;
@@ -154,8 +158,15 @@ try
             await dbContext.Database.MigrateAsync();
         }
 
-        var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
-        await seeder.SeedAsync();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+        await RoleSeeder.SeedAsync(roleManager);
+        await uow.SaveChangesAsync(); // Save roles before user seeding
+
+        await UserSeeder.SeedAsync(userManager, uow);
+        await MembershipPlanSeeder.SeedAsync(uow);
     }
     #endregion
 
