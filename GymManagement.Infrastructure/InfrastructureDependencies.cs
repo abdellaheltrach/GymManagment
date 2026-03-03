@@ -1,4 +1,5 @@
 ﻿using GymManagement.Domain.Entities.Identity;
+using GymManagement.Domain.Options;
 using GymManagement.Infrastructure.Bases;
 using GymManagement.Domain.Interfaces;
 using GymManagement.Infrastructure.Context;
@@ -21,6 +22,19 @@ namespace GymManagement.Infrastructure
         public static IServiceCollection AddInfrastructureServicesRegistration(this IServiceCollection services,
                IConfiguration configuration)
         {
+            // ── Options Configuration ──────────────────────────────────────────
+            var jwtSettings = new JwtSettings();
+            var cookieSettings = new CookieSettings();
+            var emailSettings = new EmailSettings();
+            
+            configuration.GetSection(nameof(JwtSettings)).Bind(jwtSettings);
+            configuration.GetSection(nameof(CookieSettings)).Bind(cookieSettings);
+            configuration.GetSection(nameof(EmailSettings)).Bind(emailSettings);
+
+            services.AddSingleton(jwtSettings);
+            services.AddSingleton(cookieSettings);
+            services.AddSingleton(emailSettings);
+
             // ── Audit interceptor ──────────────────────────────────────────────
             // Registered as Singleton because interceptors are resolved once
             // and IHttpContextAccessor is thread-safe.
