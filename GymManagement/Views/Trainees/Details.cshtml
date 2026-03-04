@@ -75,7 +75,7 @@
                         <dd class="col-7">@t.Bmi.Value.ToString("F1") — @t.BmiCategory</dd>
                     }
 
-                    <dt class="col-5 text-muted">Trainer</dt>
+                                    <dt class="col-5 text-muted">Trainer</dt>
                     <dd class="col-7">
                         @if (!string.IsNullOrEmpty(t.AssignedTrainerName))
                         {
@@ -131,8 +131,8 @@
 
                     @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
                     {
-                        <div class="d-flex flex-column gap-2">
-                            @if (m.RemainingBalance > 0)
+                        <div class="d-flex flex-column gap-2 mb-2">
+                            @if (m.RemainingBalance > 0 && m.Status != GymManagement.Domain.Enums.MembershipStatus.Cancelled)
                             {
                                 <a asp-controller="Payments" asp-action="Record"
                                    asp-route-traineeId="@t.Id"
@@ -147,6 +147,32 @@
                                    class="btn btn-sm btn-outline-info">
                                     <i class="bi bi-snow me-1"></i> Freeze
                                 </a>
+                            }
+                            @if (User.IsInRole("Admin"))
+                            {
+                                @if (m.Status == GymManagement.Domain.Enums.MembershipStatus.Active || m.Status == GymManagement.Domain.Enums.MembershipStatus.Frozen)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-warning"
+                                            data-bs-toggle="modal" data-bs-target="#suspendModal">
+                                        <i class="bi bi-pause-circle me-1"></i> Suspend
+                                    </button>
+                                }
+                                else if (m.Status == GymManagement.Domain.Enums.MembershipStatus.Suspended)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-success"
+                                            data-bs-toggle="modal" data-bs-target="#unsuspendModal">
+                                        <i class="bi bi-play-circle me-1"></i> Unsuspend
+                                    </button>
+                                }
+
+                                @if (m.Status != GymManagement.Domain.Enums.MembershipStatus.Cancelled && m.Status != GymManagement.Domain.Enums.MembershipStatus.Expired)
+                                {
+                                    <a asp-controller="Memberships" asp-action="Cancel"
+                                       asp-route-traineeId="@t.Id"
+                                       class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-x-circle me-1"></i> Cancel Membership
+                                    </a>
+                                }
                             }
                         </div>
                     }
@@ -231,4 +257,71 @@
             </div>
         </div>
     </div>
+
+@* ── Suspend Modal ────────────────────────────────────────────────────────── *@
+@if (t.ActiveMembership is not null && User.IsInRole("Admin"))
+{
+    var memId = t.ActiveMembership.Id;
+
+    <div class="modal fade" id="suspendModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h6 class="modal-title fw-bold">Suspend Membership</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form asp-controller="Memberships" asp-action="Suspend" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="MembershipId" value="@memId" />
+                        <input type="hidden" name="TraineeId" value="@t.Id" />
+                        <p class="small text-muted mb-3">
+                            Suspending will block check-in access immediately.
+                            The trainer assignment is kept. You can unsuspend anytime.
+                        </p>
+                        <label class="form-label fw-semibold small">Reason <span class="text-danger">*</span></label>
+                        <textarea name="Reason" class="form-control" rows="3" required
+                                  placeholder="e.g. Unpaid balance, policy violation..."></textarea>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pause-circle me-1"></i> Confirm Suspend
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="unsuspendModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h6 class="modal-title fw-bold">Reactivate Membership</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form asp-controller="Memberships" asp-action="Unsuspend" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="MembershipId" value="@memId" />
+                        <input type="hidden" name="TraineeId" value="@t.Id" />
+                        <p class="small text-muted mb-3">
+                            This will restore the membership to Active and re-grant check-in access.
+                        </p>
+                        <label class="form-label fw-semibold small">Notes (optional)</label>
+                        <input type="text" name="Notes" class="form-control"
+                               placeholder="e.g. Balance cleared, issue resolved..." />
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-success">
+                            <i class="bi bi-play-circle me-1"></i> Confirm Reactivate
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
 </div>

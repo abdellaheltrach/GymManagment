@@ -25,6 +25,7 @@ public class TraineeDetailViewModel
         MembershipStatus.Expired        => "badge bg-danger",
         MembershipStatus.PendingPayment => "badge bg-warning",
         MembershipStatus.Suspended      => "badge bg-secondary",
+        MembershipStatus.Cancelled      => "badge bg-dark",
         _                               => "badge bg-light text-dark"
     };
 
@@ -35,6 +36,7 @@ public class TraineeDetailViewModel
         MembershipStatus.Expired        => "Expired",
         MembershipStatus.PendingPayment => "Pending Payment",
         MembershipStatus.Suspended      => "Suspended",
+        MembershipStatus.Cancelled      => "Cancelled",
         _                               => "No Membership"
     };
 }

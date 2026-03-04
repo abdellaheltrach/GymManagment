@@ -1,0 +1,180 @@
+@model CancelMembershipViewModel
+@using GymManagement.Application.Features.Memberships.Commands.CancelMembership
+@using GymManagement.Domain.Enums
+@{
+    ViewData["Title"] = "Cancel Membership — " + Model.TraineeName;
+}
+
+<div class="mb-4">
+    <a asp-controller="Trainees" asp-action="Details" asp-route-id="@Model.TraineeId"
+       class="text-muted small text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i> Back to @Model.TraineeName
+    </a>
+    <h4 class="fw-bold mb-0 mt-1 text-danger">Cancel Membership</h4>
+</div>
+
+<div style="max-width:640px">
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h6 class="fw-semibold text-uppercase text-muted small mb-3">Membership Summary</h6>
+            <dl class="row small mb-0">
+                <dt class="col-5 text-muted">Trainee</dt>
+                <dd class="col-7 fw-semibold">@Model.TraineeName</dd>
+                <dt class="col-5 text-muted">Plan</dt>
+                <dd class="col-7">@Model.PlanName</dd>
+                <dt class="col-5 text-muted">Total Paid</dt>
+                <dd class="col-7">@Model.AmountPaid.ToString("C")</dd>
+                <dt class="col-5 text-muted">Suggested Refund</dt>
+                <dd class="col-7 fw-semibold text-success">
+                    @Model.SuggestedRefund.ToString("C")
+                    <span class="text-muted fw-normal">(unused days)</span>
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <form asp-action="Cancel" method="post">
+        <input type="hidden" asp-for="MembershipId" />
+        <input type="hidden" asp-for="TraineeId" />
+        <input type="hidden" asp-for="AmountPaid" />
+        <input type="hidden" asp-for="SuggestedRefund" />
+
+        <div asp-validation-summary="All" class="alert alert-danger small py-2 mb-3 d-none"
+             id="valSummary"></div>
+
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Refund Type</label>
+            <div class="d-flex flex-column gap-2">
+
+                <label class="refund-card d-flex align-items-start gap-3 border rounded p-3"
+                       style="cursor:pointer">
+                    <input type="radio" asp-for="RefundType" value="@RefundType.None"
+                           class="form-check-input mt-1 flex-shrink-0" id="refNone" />
+                    <div>
+                        <div class="fw-semibold small">No Refund</div>
+                        <div class="text-muted small">Cancel without returning any payment.</div>
+                    </div>
+                </label>
+
+                <label class="refund-card d-flex align-items-start gap-3 border rounded p-3"
+                       style="cursor:pointer">
+                    <input type="radio" asp-for="RefundType" value="@RefundType.Partial"
+                           class="form-check-input mt-1 flex-shrink-0" id="refPartial" />
+                    <div class="w-100">
+                        <div class="fw-semibold small">Partial Refund</div>
+                        <div class="text-muted small mb-2">
+                            Return a specific amount. System suggests
+                            <strong>@Model.SuggestedRefund.ToString("C")</strong> based on unused days.
+                        </div>
+                        <div class="partial-fields d-none">
+                            <div class="row g-2">
+                                <div class="col-7">
+                                    <label class="form-label small fw-semibold">Refund Amount</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">$</span>
+                                        <input asp-for="RefundAmount"
+                                               id="refundAmountInput"
+                                               class="form-control"
+                                               type="number" step="0.01" min="0.01"
+                                               max="@Model.AmountPaid"
+                                               placeholder="@Model.SuggestedRefund" />
+                                    </div>
+                                    <span asp-validation-for="RefundAmount" class="text-danger small"></span>
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label small fw-semibold">Method</label>
+                                    <select asp-for="RefundMethod"
+                                            class="form-select form-select-sm">
+                                        @foreach (var m in Enum.GetValues<PaymentMethod>())
+                                        {
+                                            <option value="@m">@m</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+
+                <label class="refund-card d-flex align-items-start gap-3 border rounded p-3"
+                       style="cursor:pointer">
+                    <input type="radio" asp-for="RefundType" value="@RefundType.Full"
+                           class="form-check-input mt-1 flex-shrink-0" id="refFull" />
+                    <div class="w-100">
+                        <div class="fw-semibold small">Full Refund</div>
+                        <div class="text-muted small mb-2">
+                            Refund all payments (@Model.AmountPaid.ToString("C") total).
+                            Each payment record will be marked as refunded.
+                        </div>
+                        <div class="full-method-field d-none">
+                            <label class="form-label small fw-semibold">Refund Method</label>
+                            <select asp-for="RefundMethod"
+                                    class="form-select form-select-sm" style="max-width:200px">
+                                @foreach (var m in Enum.GetValues<PaymentMethod>())
+                                {
+                                    <option value="@m">@m</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </label>
+
+            </div>
+            <span asp-validation-for="RefundType" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="Reason" class="form-label fw-semibold">Cancellation Reason</label>
+            <textarea asp-for="Reason" class="form-control" rows="3"
+                      placeholder="e.g. Member requested cancellation due to relocation."></textarea>
+            <span asp-validation-for="Reason" class="text-danger small"></span>
+        </div>
+
+        <div class="alert alert-warning small py-2 mb-4">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            <strong>This action cannot be undone.</strong>
+            The membership will be cancelled and the trainer assignment
+            (if any) will be automatically removed.
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('Cancel this membership? This cannot be undone.')">
+                <i class="bi bi-x-circle me-1"></i> Confirm Cancellation
+            </button>
+            <a asp-controller="Trainees" asp-action="Details" asp-route-id="@Model.TraineeId"
+               class="btn btn-outline-secondary">Discard</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .refund-card:has(input:checked) {
+        border-color: #dc3545 !important;
+        background-color: #fff5f5;
+    }
+    .refund-card:hover { background-color: #fafafa; }
+</style>
+
+<script>
+    const radios = document.querySelectorAll('input[name="RefundType"]');
+    const partialFields = document.querySelectorAll('.partial-fields');
+    const fullFields = document.querySelectorAll('.full-method-field');
+    const suggestedAmount = @Model.SuggestedRefund;
+
+    function updateFields() {
+        const val = document.querySelector('input[name="RefundType"]:checked')?.value;
+        partialFields.forEach(f => f.classList.toggle('d-none', val !== '@((int)RefundType.Partial)'));
+        fullFields.forEach(f => f.classList.toggle('d-none', val !== '@((int)RefundType.Full)'));
+
+        // Pre-fill suggested amount
+        if (val === '@((int)RefundType.Partial)') {
+            const inp = document.getElementById('refundAmountInput');
+            if (!inp.value) inp.value = suggestedAmount.toFixed(2);
+        }
+    }
+
+    radios.forEach(r => r.addEventListener('change', updateFields));
+    updateFields();
+</script>

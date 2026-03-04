@@ -7,7 +7,13 @@
         Active,
         Frozen,
         Expired,
-        Suspended
+        Suspended,
+        /// <summary>
+        /// Membership was cancelled before its natural expiry.
+        /// May have a full or partial refund recorded against it.
+        /// Trainer assignment is auto-removed on cancellation.
+        /// </summary>
+        Cancelled
     }
 
     public enum PaymentMethod
