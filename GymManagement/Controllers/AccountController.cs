@@ -77,7 +77,7 @@ namespace GymManagement.Web.Controllers
 
                 // Apply JWT and Cookie settings
                 var token = GenerateJwtToken(user);
-                
+
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = _cookieSettings.HttpOnly,
@@ -88,10 +88,15 @@ namespace GymManagement.Web.Controllers
 
                 Response.Cookies.Append("JwtToken", token, cookieOptions);
 
+                //redirect to return url if it's valid and local
                 if (!string.IsNullOrEmpty(vm.ReturnUrl) && Url.IsLocalUrl(vm.ReturnUrl))
                     return Redirect(vm.ReturnUrl);
 
-                return RedirectToAction("Index", "Dashboard");
+                // Route each role to its own dashboard
+                if (user is not null && await _userManager.IsInRoleAsync(user, "Trainer"))
+                    return RedirectToAction("Index", "TrainerDashboard");
+
+
             }
 
             if (result.IsLockedOut)

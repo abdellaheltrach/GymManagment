@@ -1,0 +1,187 @@
+﻿@model TrainerDashboardViewModel
+@using GymManagement.Domain.Enums
+@using GymManagement.Web.ViewModels.TrainerDashboard
+@{
+    ViewData["Title"] = "My Dashboard";
+}
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0">@Model.GreetingTime, @Model.TrainerName </h4>
+        <span class="text-muted small">@Model.Specialization · @DateTime.Now.ToString("dddd, dd MMM yyyy")</span>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small mb-1">My Trainees</p>
+                        <h3 class="fw-bold mb-0">@Model.Data.AssignedTrainees</h3>
+                    </div>
+                    <span class="fs-2">👥</span>
+                </div>
+                <p class="text-muted small mt-2 mb-0">Active assignments</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small mb-1">Attendance This Month</p>
+                        <h3 class="fw-bold mb-0">@Model.Data.AttendanceMarkedThisMonth</h3>
+                    </div>
+                    <span class="fs-2">✅</span>
+                </div>
+                <p class="text-muted small mt-2 mb-0">Sessions recorded</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small mb-1">Active Programs</p>
+                        <h3 class="fw-bold mb-0">@Model.Data.ActivePrograms</h3>
+                    </div>
+                    <span class="fs-2">📋</span>
+                </div>
+                <p class="text-muted small mt-2 mb-0">Training programs running</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small mb-1">Earnings This Month</p>
+                        <h3 class="fw-bold mb-0">@Model.FormattedCommission</h3>
+                    </div>
+                    <span class="fs-2">💰</span>
+                </div>
+                <p class="text-muted small mt-2 mb-0">Based on active trainees</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Trainees Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">My Trainees Today</span>
+        <a asp-controller="TrainerTrainees" asp-action="Index"
+           class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-people-fill me-1"></i> View All
+        </a>
+    </div>
+
+    @if (!Model.Data.AssignedTraineeList.Any())
+    {
+        <div class="card-body text-center text-muted py-5">
+            <i class="bi bi-people fs-1 d-block mb-2"></i>
+            <p class="mb-0">No trainees assigned yet.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Trainee</th>
+                        <th>Phone</th>
+                        <th>Membership</th>
+                        <th>Expires</th>
+                        <th>Today</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var trainee in Model.Data.AssignedTraineeList)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@trainee.FullName</td>
+                            <td class="text-muted small">@trainee.Phone</td>
+
+                            <td>
+                                @switch (trainee.ActiveMembershipStatus)
+                                {
+                                    case MembershipStatus.Active:
+                                        <span class="badge bg-success">Active</span>
+                                        break;
+                                    case MembershipStatus.Expired:
+                                        <span class="badge bg-danger">Expired</span>
+                                        break;
+                                    case MembershipStatus.Frozen:
+                                        <span class="badge bg-info text-dark">Frozen</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">None</span>
+                                        break;
+                                }
+                            </td>
+
+                            <td class="text-muted small">
+                                @(trainee.MembershipEndDate.HasValue
+                                                        ? trainee.MembershipEndDate.Value.ToString("dd MMM yyyy")
+                                                        : "—")
+                            </td>
+
+                            <td>
+                                @if (trainee.ActiveMembershipStatus == MembershipStatus.Active)
+                                {
+                                    <!-- Check In button — only if not already checked in today -->
+                                    <form asp-controller="TrainerAttendance"
+                                          asp-action="CheckIn"
+                                          method="post" class="d-inline">
+                                        <input type="hidden" name="traineeId" value="@trainee.Id" />
+                                        <input type="hidden" name="returnUrl" value="TrainerDashboard" />
+                                        <button type="submit"
+                                                class="btn btn-sm btn-success"
+                                                title="Mark Check-In">
+                                            <i class="bi bi-box-arrow-in-right me-1"></i> Check In
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">No active membership</span>
+                                }
+                            </td>
+
+                            <td>
+                                <a asp-controller="TrainerTrainees"
+                                   asp-action="Details"
+                                   asp-route-id="@trainee.Id"
+                                   class="btn btn-sm btn-outline-secondary"
+                                   title="View Profile">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a asp-controller="TrainerProgress"
+                                   asp-action="Record"
+                                   asp-route-traineeId="@trainee.Id"
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Record Progress">
+                                    <i class="bi bi-graph-up-arrow"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

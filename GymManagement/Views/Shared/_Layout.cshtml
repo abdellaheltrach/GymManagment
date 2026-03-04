@@ -24,35 +24,34 @@
                 </a>
 
                 <ul class="nav nav-pills flex-column mb-auto gap-1">
-                    <li class="nav-item">
-                        <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")"
-                           asp-controller="Dashboard" asp-action="Index">
-                            <i class="bi bi-grid-1x2-fill me-2"></i> Dashboard
-                        </a>
-                    </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Trainees" ? "active" : "")"
-                           asp-controller="Trainees" asp-action="Index">
-                            <i class="bi bi-people-fill me-2"></i> Trainees
-                        </a>
-                    </li>
-
-                    @if (User.IsInRole("Admin") || User.IsInRole("Trainer"))
+                    @* ── Dashboard — role-aware ──────────────────────────────────── *@
+                    @if (User.IsInRole("Trainer"))
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Trainers" ? "active" : "")"
-                               asp-controller="Trainers" asp-action="Index">
-                                <i class="bi bi-person-badge-fill me-2"></i> Trainers
+                            <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "TrainerDashboard" ? "active" : "")"
+                               asp-controller="TrainerDashboard" asp-action="Index">
+                                <i class="bi bi-grid-1x2-fill me-2"></i> Dashboard
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")"
+                               asp-controller="Dashboard" asp-action="Index">
+                                <i class="bi bi-grid-1x2-fill me-2"></i> Dashboard
                             </a>
                         </li>
                     }
 
+                    @* ── Admin / Receptionist nav ────────────────────────────────── *@
                     @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Payments" asp-action="Index">
-                                <i class="bi bi-cash-coin me-2"></i> Payments
+                            <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Trainees" ? "active" : "")"
+                               asp-controller="Trainees" asp-action="Index">
+                                <i class="bi bi-people-fill me-2"></i> Trainees
                             </a>
                         </li>
                     }
@@ -60,11 +59,61 @@
                     @if (User.IsInRole("Admin"))
                     {
                         <li class="nav-item">
+                            <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Trainers" ? "active" : "")"
+                               asp-controller="Trainers" asp-action="Index">
+                                <i class="bi bi-person-badge-fill me-2"></i> Trainers
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "MembershipPlans" ? "active" : "")"
                                asp-controller="MembershipPlans" asp-action="Index">
                                 <i class="bi bi-card-checklist me-2"></i> Plans
                             </a>
                         </li>
+                    }
+
+                    @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "Payments" ? "active" : "")"
+                               asp-controller="Payments" asp-action="Index">
+                                <i class="bi bi-cash-coin me-2"></i> Payments
+                            </a>
+                        </li>
+                    }
+
+                    @* ── Trainer-only nav ────────────────────────────────────────── *@
+                    @if (User.IsInRole("Trainer"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "TrainerTrainees" ? "active" : "")"
+                               asp-controller="TrainerTrainees" asp-action="Index">
+                                <i class="bi bi-people-fill me-2"></i> My Trainees
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "TrainerPrograms" ? "active" : "")"
+                               asp-controller="TrainerPrograms" asp-action="Index">
+                                <i class="bi bi-journal-text me-2"></i> Programs
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "TrainerProgress" ? "active" : "")"
+                               asp-controller="TrainerProgress" asp-action="Index">
+                                <i class="bi bi-graph-up-arrow me-2"></i> Progress
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white @(ViewContext.RouteData.Values["controller"]?.ToString() == "TrainerProfile" ? "active" : "")"
+                               asp-controller="TrainerProfile" asp-action="Index">
+                                <i class="bi bi-person-circle me-2"></i> My Profile
+                            </a>
+                        </li>
+                    }
+
+                    @* ── Admin-only jobs ─────────────────────────────────────────── *@
+                    @if (User.IsInRole("Admin"))
+                    {
                         <li class="nav-item">
                             <a class="nav-link text-white" href="/hangfire">
                                 <i class="bi bi-gear-fill me-2"></i> Jobs
