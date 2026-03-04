@@ -1,0 +1,209 @@
+﻿@model MyTraineesListViewModel
+@using GymManagement.Domain.Enums
+@using GymManagement.Web.ViewModels.Trainer
+@{
+    ViewData["Title"] = "My Trainees";
+}
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0">My Trainees</h4>
+        <span class="text-muted small">@Model.TotalCount assigned · @Model.CheckedInToday checked in today</span>
+    </div>
+</div>
+
+<!-- Quick stats bar -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center py-3">
+            <h4 class="fw-bold mb-0">@Model.TotalCount</h4>
+            <p class="text-muted small mb-0">Total Assigned</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center py-3">
+            <h4 class="fw-bold mb-0 text-success">@Model.CheckedInToday</h4>
+            <p class="text-muted small mb-0">Checked In Today</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center py-3">
+            <h4 class="fw-bold mb-0 text-primary">@Model.ActiveCount</h4>
+            <p class="text-muted small mb-0">Active Memberships</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center py-3">
+            <h4 class="fw-bold mb-0 @(Model.ExpiringSoon > 0 ? "text-warning" : "")">@Model.ExpiringSoon</h4>
+            <p class="text-muted small mb-0">Expiring This Week</p>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Filter -->
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body py-2">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" name="search" value="@Model.SearchTerm"
+                           class="form-control border-start-0"
+                           placeholder="Search by name, phone or email..." />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">All Statuses</option>
+                    @foreach (var s in Enum.GetValues<MembershipStatus>())
+                    {
+                        <option value="@s" selected="@(Model.StatusFilter == s)">@s</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-dark w-100">Filter</button>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.StatusFilter.HasValue)
+            {
+                <div class="col-md-1">
+                    <a asp-action="Index" class="btn btn-sm btn-outline-secondary w-100">✕</a>
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+<!-- Trainees Table -->
+<div class="card border-0 shadow-sm">
+    @if (!Model.Trainees.Any())
+    {
+        <div class="card-body text-center text-muted py-5">
+            <i class="bi bi-people fs-1 d-block mb-2"></i>
+            <p class="mb-0">
+                @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.StatusFilter.HasValue)
+                {
+                    <text>No trainees match your search.</text>
+                }
+                else
+                {
+                    <text>No trainees assigned yet.</text>
+                }
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Trainee</th>
+                        <th>Phone</th>
+                        <th>Membership</th>
+                        <th>Expires In</th>
+                        <th>Sessions</th>
+                        <th>Last Check-In</th>
+                        <th>Today</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model.Trainees)
+                    {
+                        <tr class="@(t.CheckedInToday ? "table-success" : "")">
+                            <td>
+                                <div class="fw-semibold">@t.FullName</div>
+                                <div class="text-muted small">@t.Email</div>
+                            </td>
+                            <td class="text-muted small">@t.Phone</td>
+
+                            <td>
+                                @switch (t.MembershipStatus)
+                                {
+                                    case MembershipStatus.Active:
+                                        <span class="badge bg-success">Active</span>
+                                        break;
+                                    case MembershipStatus.Expired:
+                                        <span class="badge bg-danger">Expired</span>
+                                        break;
+                                    case MembershipStatus.Frozen:
+                                        <span class="badge bg-info text-dark">Frozen</span>
+                                        break;
+                                    case MembershipStatus.PendingPayment:
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">None</span>
+                                        break;
+                                }
+                            </td>
+
+                            <td>
+                                @if (t.MembershipStatus == MembershipStatus.Active && t.DaysUntilExpiry > 0)
+                                {
+                                    <span class="@(t.DaysUntilExpiry <= 7 ? "text-warning fw-semibold" : "text-muted small")">
+                                        @t.DaysUntilExpiry days
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">—</span>
+                                }
+                            </td>
+
+                            <td class="text-muted small">@t.TotalSessions</td>
+
+                            <td class="text-muted small">
+                                @(t.LastCheckIn.HasValue
+                                    ? t.LastCheckIn.Value.ToString("dd MMM, HH:mm")
+                                    : "Never")
+                            </td>
+
+                            <td>
+                                @if (t.CheckedInToday)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-lg me-1"></i>In
+                                    </span>
+                                }
+                                else if (t.MembershipStatus == MembershipStatus.Active)
+                                {
+                                    <form asp-controller="TrainerAttendance"
+                                          asp-action="CheckIn" method="post" class="d-inline">
+                                        <input type="hidden" name="traineeId" value="@t.TraineeId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-box-arrow-in-right"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">—</span>
+                                }
+                            </td>
+
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a asp-action="Details" asp-route-id="@t.TraineeId"
+                                       class="btn btn-sm btn-outline-secondary" title="View Profile">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-controller="TrainerProgress"
+                                       asp-action="Record"
+                                       asp-route-traineeId="@t.TraineeId"
+                                       class="btn btn-sm btn-outline-primary" title="Record Progress">
+                                        <i class="bi bi-graph-up-arrow"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

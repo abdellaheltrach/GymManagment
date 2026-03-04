@@ -95,8 +95,8 @@ namespace GymManagement.Web.Controllers
                 // Route each role to its own dashboard
                 if (user is not null && await _userManager.IsInRoleAsync(user, "Trainer"))
                     return RedirectToAction("Index", "TrainerDashboard");
-
-
+                else
+                    return RedirectToAction("Index", "Dashboard");
             }
 
             if (result.IsLockedOut)

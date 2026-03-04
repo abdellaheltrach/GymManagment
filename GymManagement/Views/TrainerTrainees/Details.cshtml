@@ -1,0 +1,246 @@
+﻿@model MyTraineeDetailViewModel
+@using GymManagement.Domain.Enums
+@using GymManagement.Web.ViewModels.Trainer
+@{
+    var t = Model.Trainee;
+    ViewData["Title"] = string.Join(" ", [t.FirstName, t.LastName]);
+}
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a asp-action="Index" class="text-muted small text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i> Back to My Trainees
+        </a>
+        <h4 class="fw-bold mb-0 mt-1">@string.Join(" ", [t.FirstName, t.LastName])</h4>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="TrainerAttendance"
+           asp-action="CheckIn"
+           asp-route-traineeId="@t.Id"
+           class="btn btn-sm btn-success">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Check In
+        </a>
+        <a asp-controller="TrainerProgress"
+           asp-action="Record"
+           asp-route-traineeId="@t.Id"
+           class="btn btn-sm btn-primary">
+            <i class="bi bi-graph-up-arrow me-1"></i> Record Progress
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+
+    <!-- Profile Card -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="fw-semibold text-uppercase text-muted small mb-3">Profile</h6>
+                <dl class="row small mb-0">
+                    <dt class="col-5 text-muted">Phone</dt>
+                    <dd class="col-7">@t.Phone</dd>
+
+                    <dt class="col-5 text-muted">Email</dt>
+                    <dd class="col-7 text-break">@t.Email</dd>
+
+                    <dt class="col-5 text-muted">Date of Birth</dt>
+                    <dd class="col-7">@t.DateOfBirth.ToString("dd MMM yyyy") (@t.Age yrs)</dd>
+
+                    <dt class="col-5 text-muted">Gender</dt>
+                    <dd class="col-7">@t.Gender</dd>
+
+                    <dt class="col-5 text-muted">Joined</dt>
+                    <dd class="col-7">@t.JoinDate.ToString("dd MMM yyyy")</dd>
+
+                    @if (t.HeightCm.HasValue)
+                    {
+                        <dt class="col-5 text-muted">Height</dt>
+                        <dd class="col-7">@t.HeightCm cm</dd>
+                    }
+                    @if (t.WeightKg.HasValue)
+                    {
+                        <dt class="col-5 text-muted">Weight</dt>
+                        <dd class="col-7">@t.WeightKg kg</dd>
+                    }
+                    @if (!string.IsNullOrEmpty(t.BmiCategory))
+                    {
+                        <dt class="col-5 text-muted">BMI</dt>
+                        <dd class="col-7">@t.Bmi?.ToString("F1") (@t.BmiCategory)</dd>
+                    }
+                    @if (!string.IsNullOrEmpty(t.MedicalNotes))
+                    {
+                        <dt class="col-5 text-muted">Medical</dt>
+                        <dd class="col-7 text-danger small">@t.MedicalNotes</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Membership Card -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="fw-semibold text-uppercase text-muted small mb-3">Membership</h6>
+
+                @if (t.ActiveMembership is not null)
+                {
+                    var m = t.ActiveMembership;
+                    <dl class="row small mb-0">
+                        <dt class="col-5 text-muted">Plan</dt>
+                        <dd class="col-7">@m.PlanName</dd>
+
+                        <dt class="col-5 text-muted">Status</dt>
+                        <dd class="col-7">
+                            <span class="@Model.MembershipStatusBadge">
+                                @m.Status
+                            </span>
+                        </dd>
+
+                        <dt class="col-5 text-muted">Access</dt>
+                        <dd class="col-7">@m.AccessLevel</dd>
+
+                        <dt class="col-5 text-muted">Started</dt>
+                        <dd class="col-7">@m.StartDate.ToString("dd MMM yyyy")</dd>
+
+                        <dt class="col-5 text-muted">Expires</dt>
+                        <dd class="col-7 @(m.EndDate < DateTime.UtcNow.AddDays(7) ? "text-warning fw-semibold" : "")">
+                            @m.EndDate.ToString("dd MMM yyyy")
+                        </dd>
+
+                        <dt class="col-5 text-muted">Balance</dt>
+                        <dd class="col-7 @(m.RemainingBalance > 0 ? "text-danger" : "text-success")">
+                            @(m.RemainingBalance > 0 ? $"{m.RemainingBalance:C} due" : "Fully paid")
+                        </dd>
+
+                        @if (m.TotalFrozenDays > 0)
+                        {
+                            <dt class="col-5 text-muted">Frozen</dt>
+                            <dd class="col-7">@m.TotalFrozenDays days total</dd>
+                        }
+                    </dl>
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">No active membership.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Summary Card -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="fw-semibold text-uppercase text-muted small mb-3">Attendance</h6>
+
+                @if (Model.HasAttendance)
+                {
+                    <p class="text-muted small mb-3">Last 10 sessions</p>
+                    <div class="list-group list-group-flush">
+                        @foreach (var a in Model.RecentAttendance)
+                        {
+                            <div class="list-group-item px-0 py-2 border-0 border-bottom">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="small fw-semibold">@a.CheckIn.ToString("dd MMM, HH:mm")</span>
+                                    @if (a.DurationMinutes.HasValue)
+                                    {
+                                        <span class="badge bg-light text-dark">
+                                            @((int)a.DurationMinutes.Value) min
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">Open</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">No attendance recorded yet.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Chart -->
+@if (Model.HasProgress)
+{
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">Progress Over Time</span>
+            <a asp-controller="TrainerProgress"
+               asp-action="Record"
+               asp-route-traineeId="@t.Id"
+               class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-plus-lg me-1"></i> Add Record
+            </a>
+        </div>
+        <div class="card-body">
+            <canvas id="progressChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const labels  = [@Html.Raw(string.Join(",", Model.ProgressRecords.Select(p => $"\"{p.Label}\"")))];
+        const weights = [@string.Join(",", Model.ProgressRecords.Select(p => p.WeightKg?.ToString() ?? "null"))];
+        const bodyFat = [@string.Join(",", Model.ProgressRecords.Select(p => p.BodyFatPercent?.ToString() ?? "null"))];
+
+        new Chart(document.getElementById("progressChart"), {
+            type: "line",
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: "Weight (kg)",
+                        data: weights,
+                        borderColor: "#0d6efd",
+                        backgroundColor: "rgba(13,110,253,0.08)",
+                        tension: 0.3,
+                        fill: true,
+                        spanGaps: true
+                    },
+                    {
+                        label: "Body Fat (%)",
+                        data: bodyFat,
+                        borderColor: "#dc3545",
+                        backgroundColor: "rgba(220,53,69,0.08)",
+                        tension: 0.3,
+                        fill: true,
+                        spanGaps: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: "top" }
+                },
+                scales: {
+                    y: { beginAtZero: false }
+                }
+            }
+        });
+    </script>
+}
+else
+{
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-body text-center text-muted py-4">
+            <i class="bi bi-graph-up fs-1 d-block mb-2"></i>
+            <p class="mb-2">No progress records yet.</p>
+            <a asp-controller="TrainerProgress"
+               asp-action="Record"
+               asp-route-traineeId="@t.Id"
+               class="btn btn-sm btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Record First Progress
+            </a>
+        </div>
+    </div>
+}
