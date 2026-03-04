@@ -1,0 +1,65 @@
+@using GymManagement.Web.ViewModels.TrainerProgress
+@model TrainerProgressIndexViewModel
+@{
+    ViewData["Title"] = "Progress Tracking";
+}
+
+<div class="mb-4">
+    <h4 class="fw-bold mb-0">Progress Tracking</h4>
+    <p class="text-muted small">Select a trainee to view history or record new measurements.</p>
+</div>
+
+@if (!Model.Trainees.Any())
+{
+    <div class="card border-0 shadow-sm text-center py-5">
+        <div class="card-body">
+            <i class="bi bi-graph-up-arrow fs-1 text-muted mb-3 d-block"></i>
+            <p class="text-muted">No trainees assigned to you yet.</p>
+            <a asp-controller="TrainerTrainees" asp-action="Index" class="btn btn-sm btn-dark">
+                View My Trainees
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var t in Model.Trainees)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-2">@t.FullName</h6>
+                        
+                        <div class="mb-3 small">
+                            @if (t.LatestWeight.HasValue)
+                            {
+                                <div class="text-muted mb-1">
+                                    Last weight: <span class="fw-semibold text-dark">@t.LatestWeight kg</span>
+                                </div>
+                                <div class="text-muted">
+                                    Recorded on: @t.LatestRecordedAt!.Value.ToString("dd MMM yyyy")
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-muted italic">No measurements recorded yet.</div>
+                            }
+                        </div>
+
+                        <div class="d-flex gap-2 mt-auto">
+                            <a asp-action="History" asp-route-traineeId="@t.TraineeId" 
+                               class="btn btn-sm btn-outline-dark flex-grow-1">
+                                <i class="bi bi-clock-history me-1"></i> History
+                            </a>
+                            <a asp-action="Record" asp-route-traineeId="@t.TraineeId" 
+                               class="btn btn-sm btn-primary flex-grow-1">
+                                <i class="bi bi-plus-lg me-1"></i> Record
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

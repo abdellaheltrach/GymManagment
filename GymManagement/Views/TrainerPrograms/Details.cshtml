@@ -1,0 +1,120 @@
+@using GymManagement.Web.ViewModels.TrainerPrograms
+@model ProgramDetailViewModel
+@{
+    var p = Model.Program;
+    ViewData["Title"] = p.Title;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a asp-action="Index" class="text-muted small text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i> Back to Programs
+        </a>
+        <h4 class="fw-bold mb-0 mt-1">@p.Title</h4>
+        <span class="text-muted small">
+            @p.TraineeName · @p.StartDate.ToString("dd MMM yyyy")
+            @(p.IsActive
+                ? string.Empty
+                : " · (Inactive)")
+        </span>
+    </div>
+    @if (p.IsActive)
+    {
+        <form asp-action="Deactivate" method="post">
+            <input type="hidden" name="id" value="@p.Id" />
+            <button type="submit" class="btn btn-sm btn-outline-danger">
+                Deactivate
+            </button>
+        </form>
+    }
+</div>
+
+@if (!string.IsNullOrEmpty(p.Description))
+{
+    <p class="text-muted mb-4">@p.Description</p>
+}
+
+<!-- Exercises table -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold">
+        Exercises (@p.Exercises.Count)
+    </div>
+    @if (!p.Exercises.Any())
+    {
+        <div class="card-body text-center text-muted py-4">
+            No exercises added yet. Use the form below.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th><th>Exercise</th><th>Sets</th><th>Reps</th>
+                        <th>Weight</th><th>Rest</th><th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in p.Exercises)
+                    {
+                        <tr>
+                            <td class="text-muted">@e.Order</td>
+                            <td class="fw-semibold">@e.Name</td>
+                            <td>@e.Sets</td>
+                            <td>@e.Reps</td>
+                            <td>@(e.WeightKg.HasValue ? e.WeightKg + " kg" : "BW")</td>
+                            <td>@(e.RestSeconds.HasValue ? e.RestSeconds + "s" : "—")</td>
+                            <td class="text-muted small">@(e.Notes ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Add Exercise form -->
+@if (p.IsActive)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white fw-semibold">Add Exercise</div>
+        <div class="card-body">
+            <form asp-action="AddExercise" method="post">
+                <input type="hidden" asp-for="AddExerciseForm.ProgramId" />
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Name *</label>
+                        <input asp-for="AddExerciseForm.Name" class="form-control"
+                               placeholder="e.g. Bench Press" />
+                    </div>
+                    <div class="col-md-1">
+                        <label asp-for="AddExerciseForm.Sets" class="form-label"></label>
+                        <input asp-for="AddExerciseForm.Sets" class="form-control" type="number" />
+                    </div>
+                    <div class="col-md-1">
+                        <label asp-for="AddExerciseForm.Reps" class="form-label"></label>
+                        <input asp-for="AddExerciseForm.Reps" class="form-control" type="number" />
+                    </div>
+                    <div class="col-md-2">
+                        <label asp-for="AddExerciseForm.WeightKg" class="form-label"></label>
+                        <input asp-for="AddExerciseForm.WeightKg" class="form-control"
+                               type="number" step="0.5" placeholder="kg" />
+                    </div>
+                    <div class="col-md-2">
+                        <label asp-for="AddExerciseForm.RestSeconds" class="form-label"></label>
+                        <input asp-for="AddExerciseForm.RestSeconds" class="form-control"
+                               type="number" placeholder="sec" />
+                    </div>
+                    <div class="col-md-2">
+                        <label asp-for="AddExerciseForm.Notes" class="form-label"></label>
+                        <input asp-for="AddExerciseForm.Notes" class="form-control" />
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-dark btn-sm mt-3">
+                    <i class="bi bi-plus-lg me-1"></i> Add Exercise
+                </button>
+            </form>
+        </div>
+    </div>
+}

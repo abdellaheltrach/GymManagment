@@ -1,0 +1,129 @@
+@using GymManagement.Web.ViewModels.TrainerProgress
+@model ProgressHistoryViewModel
+@{
+    ViewData["Title"] = "Progress History — " + Model.TraineeName;
+    var (wCss, wArrow)   = ProgressHistoryViewModel.DeltaBadge(Model.WeightDelta, lowerIsBetter: true);
+    var (fCss, fArrow)   = ProgressHistoryViewModel.DeltaBadge(Model.BodyFatDelta, lowerIsBetter: true);
+    var (mCss, mArrow)   = ProgressHistoryViewModel.DeltaBadge(Model.MuscleDelta, lowerIsBetter: false);
+    var (wcCss, wcArrow) = ProgressHistoryViewModel.DeltaBadge(Model.WaistDelta, lowerIsBetter: true);
+}
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a asp-controller="TrainerTrainees" asp-action="Details"
+           asp-route-id="@Model.TraineeId"
+           class="text-muted small text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i> Back to @Model.TraineeName
+        </a>
+        <h4 class="fw-bold mb-0 mt-1">Progress History</h4>
+    </div>
+    <a asp-action="Record" asp-route-traineeId="@Model.TraineeId"
+       class="btn btn-sm btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> New Record
+    </a>
+</div>
+
+<!-- Delta badges -->
+@if (Model.HasRecords && Model.Records.Count > 1)
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 text-center">
+            <div class="card border-0 shadow-sm py-3">
+                <span class="@wCss fs-6">@wArrow kg</span>
+                <p class="text-muted small mb-0 mt-1">Weight change</p>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="card border-0 shadow-sm py-3">
+                <span class="@fCss fs-6">@fArrow %</span>
+                <p class="text-muted small mb-0 mt-1">Body fat change</p>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="card border-0 shadow-sm py-3">
+                <span class="@mCss fs-6">@mArrow kg</span>
+                <p class="text-muted small mb-0 mt-1">Muscle mass change</p>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="card border-0 shadow-sm py-3">
+                <span class="@wcCss fs-6">@wcArrow cm</span>
+                <p class="text-muted small mb-0 mt-1">Waist change</p>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Records table -->
+<div class="card border-0 shadow-sm mb-4">
+    @if (!Model.HasRecords)
+    {
+        <div class="card-body text-center text-muted py-5">
+            <i class="bi bi-graph-up fs-1 d-block mb-2"></i>
+            <p class="mb-0">No progress records yet.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Weight</th>
+                        <th>Body Fat</th>
+                        <th>Muscle</th>
+                        <th>Waist</th>
+                        <th>Chest</th>
+                        <th>Hips</th>
+                        <th>Arm</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model.Records.OrderByDescending(r => r.RecordedAt))
+                    {
+                        <tr>
+                            <td class="fw-semibold small">@r.RecordedAt.ToString("dd MMM yyyy")</td>
+                            <td>@(r.WeightKg?.ToString("F1") ?? "—") <small class="text-muted">kg</small></td>
+                            <td>@(r.BodyFatPercent?.ToString("F1") ?? "—") <small class="text-muted">%</small></td>
+                            <td>@(r.MuscleMassKg?.ToString("F1") ?? "—") <small class="text-muted">kg</small></td>
+                            <td>@(r.WaistCm?.ToString("F1") ?? "—") <small class="text-muted">cm</small></td>
+                            <td>@(r.ChestCm?.ToString("F1") ?? "—") <small class="text-muted">cm</small></td>
+                            <td class="text-muted small">—</td>
+                            <td class="text-muted small">—</td>
+                            <td class="text-muted small">@(r.Notes ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Chart -->
+@if (Model.HasRecords)
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white fw-semibold">Progress Chart</div>
+        <div class="card-body"><canvas id="pChart" height="90"></canvas></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    const labels  = [@Html.Raw(string.Join(",", Model.Records.OrderBy(r=>r.RecordedAt).Select(r => $"\"{ r.RecordedAt:dd MMM}\"")))];
+    const weights = [@string.Join(",", Model.Records.OrderBy(r=>r.RecordedAt).Select(r => r.WeightKg?.ToString() ?? "null"))];
+    const fat     = [@string.Join(",", Model.Records.OrderBy(r=>r.RecordedAt).Select(r => r.BodyFatPercent?.ToString() ?? "null"))];
+    const muscle  = [@string.Join(",", Model.Records.OrderBy(r=>r.RecordedAt).Select(r => r.MuscleMassKg?.ToString() ?? "null"))];
+    new Chart(document.getElementById('pChart'), {
+        type: 'line',
+        data: { labels, datasets: [
+            { label: 'Weight (kg)',    data: weights, borderColor: '#0d6efd', tension: 0.3, spanGaps: true },
+            { label: 'Body Fat (%)',   data: fat,     borderColor: '#dc3545', tension: 0.3, spanGaps: true },
+            { label: 'Muscle (kg)',    data: muscle,  borderColor: '#198754', tension: 0.3, spanGaps: true },
+        ]},
+        options: { responsive: true, plugins: { legend: { position: 'top' } },
+                   scales: { y: { beginAtZero: false } } }
+    });
+    </script>
+}

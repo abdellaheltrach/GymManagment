@@ -1,0 +1,75 @@
+@using GymManagement.Web.ViewModels.TrainerPrograms
+@model TrainerProgramsListViewModel
+@{  ViewData["Title"] = "Training Programs"; }
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0">Training Programs</h4>
+        <span class="text-muted small">@Model.ActiveCount active · @Model.InactiveCount inactive</span>
+    </div>
+    <a asp-action="Create" class="btn btn-dark">
+        <i class="bi bi-plus-lg me-1"></i> New Program
+    </a>
+</div>
+
+@if (!Model.Programs.Any())
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center text-muted py-5">
+            <i class="bi bi-journal-text fs-1 d-block mb-2"></i>
+            <p class="mb-2">No programs created yet.</p>
+            <a asp-action="Create" class="btn btn-sm btn-dark">Create First Program</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var p in Model.Programs)
+        {
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="fw-bold mb-0">@p.Title</h6>
+                            @if (p.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                        </div>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-person me-1"></i>@p.TraineeName
+                        </p>
+                        <p class="text-muted small mb-3">
+                            @p.StartDate.ToString("dd MMM yyyy")
+                            @(p.EndDate.HasValue ? " — " + p.EndDate.Value.ToString("dd MMM yyyy") : "(ongoing)")
+                        </p>
+                        <p class="text-muted small mb-3">
+                            @p.Exercises.Count exercise(s)
+                        </p>
+                        <div class="d-flex gap-2">
+                            <a asp-action="Details" asp-route-id="@p.Id"
+                               class="btn btn-sm btn-outline-dark">
+                                <i class="bi bi-eye me-1"></i> View
+                            </a>
+                            @if (p.IsActive)
+                            {
+                                <form asp-action="Deactivate" method="post">
+                                    <input type="hidden" name="id" value="@p.Id" />
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger">
+                                        Deactivate
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,96 @@
+@using GymManagement.Web.ViewModels.TrainerProfile
+@model TrainerProfileViewModel
+@{
+    ViewData["Title"] = "My Profile";
+    var p = Model.Profile;
+}
+
+<div class="mb-4">
+    <h4 class="fw-bold mb-0">My Profile</h4>
+    <span class="text-muted small">Read-only · Contact admin to update your info</span>
+</div>
+
+<div class="row g-4">
+
+    <!-- Personal Info -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="fw-semibold text-uppercase text-muted small mb-3">Personal</h6>
+                <dl class="row small mb-0">
+                    <dt class="col-5 text-muted">Name</dt>
+                    <dd class="col-7 fw-semibold">@p.FullName</dd>
+
+                    <dt class="col-5 text-muted">Email</dt>
+                    <dd class="col-7">@p.Email</dd>
+
+                    <dt class="col-5 text-muted">Phone</dt>
+                    <dd class="col-7">@p.Phone</dd>
+
+                    <dt class="col-5 text-muted">Specialization</dt>
+                    <dd class="col-7">
+                        <span class="badge bg-secondary">@p.Specialization</span>
+                    </dd>
+
+                    <dt class="col-5 text-muted">Experience</dt>
+                    <dd class="col-7">@Model.YearsLabel</dd>
+
+                    <dt class="col-5 text-muted">Hired</dt>
+                    <dd class="col-7">@p.HireDate.ToString("dd MMM yyyy")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary & Stats -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="fw-semibold text-uppercase text-muted small mb-3">Salary</h6>
+                <dl class="row small mb-4">
+                    <dt class="col-5 text-muted">Type</dt>
+                    <dd class="col-7">@p.SalaryType</dd>
+
+                    <dt class="col-5 text-muted">Amount</dt>
+                    <dd class="col-7 fw-semibold">@Model.SalaryDisplay</dd>
+                </dl>
+
+                <h6 class="fw-semibold text-uppercase text-muted small mb-3">This Month</h6>
+                <div class="row g-2 text-center">
+                    <div class="col-4">
+                        <div class="bg-light rounded py-3">
+                            <div class="fw-bold fs-5">@p.AssignedTrainees</div>
+                            <div class="text-muted" style="font-size:0.72rem">Trainees</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-light rounded py-3">
+                            <div class="fw-bold fs-5">@p.ActivePrograms</div>
+                            <div class="text-muted" style="font-size:0.72rem">Programs</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-light rounded py-3">
+                            <div class="fw-bold fs-5">@p.SessionsThisMonth</div>
+                            <div class="text-muted" style="font-size:0.72rem">Sessions</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bio -->
+    @if (!string.IsNullOrEmpty(p.Bio))
+    {
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="fw-semibold text-uppercase text-muted small mb-2">Bio</h6>
+                    <p class="mb-0 text-muted">@p.Bio</p>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>

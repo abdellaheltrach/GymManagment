@@ -1,0 +1,92 @@
+@using GymManagement.Web.ViewModels.TrainerProgress
+@model RecordProgressViewModel
+@{
+    ViewData["Title"] = "Record Progress — " + Model.TraineeName;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a asp-controller="TrainerTrainees" asp-action="Details"
+           asp-route-id="@Model.TraineeId"
+           class="text-muted small text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i> Back to @Model.TraineeName
+        </a>
+        <h4 class="fw-bold mb-0 mt-1">Record Progress</h4>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white fw-semibold">
+        @Model.TraineeName — @DateTime.Now.ToString("dd MMM yyyy")
+    </div>
+    <div class="card-body">
+        <form asp-action="Record" method="post">
+            <input type="hidden" asp-for="TraineeId" />
+            <input type="hidden" asp-for="TraineeName" />
+
+            <p class="text-muted small mb-4">
+                All fields are optional. Fill in whatever was measured today.
+            </p>
+
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label asp-for="WeightKg" class="form-label"></label>
+                    <input asp-for="WeightKg" class="form-control"
+                           type="number" step="0.1" placeholder="e.g. 82.5" />
+                    <span asp-validation-for="WeightKg" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="BodyFatPercent" class="form-label"></label>
+                    <input asp-for="BodyFatPercent" class="form-control"
+                           type="number" step="0.1" placeholder="e.g. 18.5" />
+                    <span asp-validation-for="BodyFatPercent" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="MuscleMassKg" class="form-label"></label>
+                    <input asp-for="MuscleMassKg" class="form-control"
+                           type="number" step="0.1" placeholder="e.g. 35.0" />
+                    <span asp-validation-for="MuscleMassKg" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="WaistCm" class="form-label"></label>
+                    <input asp-for="WaistCm" class="form-control"
+                           type="number" step="0.5" placeholder="e.g. 84.0" />
+                    <span asp-validation-for="WaistCm" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="ChestCm" class="form-label"></label>
+                    <input asp-for="ChestCm" class="form-control"
+                           type="number" step="0.5" placeholder="e.g. 100.0" />
+                    <span asp-validation-for="ChestCm" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="HipsCm" class="form-label"></label>
+                    <input asp-for="HipsCm" class="form-control"
+                           type="number" step="0.5" placeholder="e.g. 95.0" />
+                    <span asp-validation-for="HipsCm" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="ArmCm" class="form-label"></label>
+                    <input asp-for="ArmCm" class="form-control"
+                           type="number" step="0.5" placeholder="e.g. 34.0" />
+                    <span asp-validation-for="ArmCm" class="text-danger small"></span>
+                </div>
+                <div class="col-md-9">
+                    <label asp-for="Notes" class="form-label"></label>
+                    <textarea asp-for="Notes" class="form-control" rows="2"
+                              placeholder="Session notes, observations..."></textarea>
+                    <span asp-validation-for="Notes" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i> Save Progress
+                </button>
+                <a asp-controller="TrainerTrainees" asp-action="Details"
+                   asp-route-id="@Model.TraineeId"
+                   class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
