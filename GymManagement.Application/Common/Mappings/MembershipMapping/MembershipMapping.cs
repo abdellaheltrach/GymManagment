@@ -21,7 +21,11 @@ public partial class MappingProfile
                 src.RemainingBalance,
                 src.IsFullyPaid,
                 src.TotalFrozenDays,
-                src.Notes
+                src.Notes,
+                src.Plan != null && src.Plan.IncludesPersonalTrainer,
+                src.Plan != null ? src.Plan.TrainerAddonFee : 0,
+                src.TrainerAddonPaid,
+                src.TrainerAddonPaidAt
             ));
     }
 }

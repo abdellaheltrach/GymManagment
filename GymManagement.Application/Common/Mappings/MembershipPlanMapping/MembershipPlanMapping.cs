@@ -16,6 +16,7 @@ public partial class MappingProfile
                 src.Price,
                 src.AccessLevel,
                 src.IncludesPersonalTrainer,
+                src.TrainerAddonFee,
                 src.MaxFreezeDays,
                 src.IsActive
             ));

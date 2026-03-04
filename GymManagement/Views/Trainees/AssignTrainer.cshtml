@@ -1,0 +1,304 @@
+@model AssignTrainerViewModel
+@using GymManagement.Domain.Enums
+@{
+    ViewData["Title"] = (Model.IsReassignment ? "Change Trainer" : "Assign Trainer")
+                        + " — " + Model.TraineeName;
+}
+
+<div class="mb-4">
+    <a asp-action="Details" asp-route-id="@Model.TraineeId"
+       class="text-muted small text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i> Back to @Model.TraineeName
+    </a>
+    <h4 class="fw-bold mb-0 mt-1">
+        @(Model.IsReassignment ? "Change Trainer" : "Assign Trainer")
+    </h4>
+</div>
+
+<div class="row g-4" style="max-width:780px">
+
+    @* STATE 1: No active membership *@
+    @if (!Model.HasActiveMembership)
+    {
+        <div class="col-12">
+            <div class="alert alert-danger d-flex align-items-start gap-3">
+                <i class="bi bi-x-circle-fill fs-4 mt-1 flex-shrink-0"></i>
+                <div>
+                    <strong>No active membership</strong>
+                    <p class="mb-2 small mt-1">
+                        @Model.TraineeName does not have an active membership.
+                        Assign a membership first before assigning a trainer.
+                    </p>
+                    <a asp-controller="Memberships" asp-action="Assign"
+                       asp-route-traineeId="@Model.TraineeId"
+                       class="btn btn-sm btn-danger">
+                        <i class="bi bi-plus-lg me-1"></i> Assign Membership
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* STATE 2: Plan does not include trainer *@
+    else if (!Model.PlanIncludesTrainer)
+    {
+        <div class="col-12">
+            <div class="alert alert-warning d-flex align-items-start gap-3">
+                <i class="bi bi-exclamation-triangle-fill fs-4 mt-1 flex-shrink-0"></i>
+                <div class="w-100">
+                    <strong>Plan does not include personal trainer</strong>
+                    <p class="mb-3 small mt-1">
+                        Current plan: <strong>@Model.PlanName</strong>.
+                        This plan does not include personal trainer access.
+                        Upgrade the trainee to a plan with trainer access to assign a coach.
+                    </p>
+
+                    @if (TempData["Error"] is string err)
+                    {
+                        <div class="alert alert-danger small py-2 mb-3">@err</div>
+                    }
+
+                    @if (!Model.EligiblePlans.Any())
+                    {
+                        <div class="alert alert-info small py-2">
+                            No active plans with personal trainer access are available for upgrade.
+                        </div>
+                    }
+                    else if (!Model.AvailableTrainers.Any())
+                    {
+                        <div class="alert alert-info small py-2">
+                            No active trainers are available to assign right now.
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-action="UpgradeAndAssignTrainer" method="post" class="border rounded p-3 bg-white">
+                            <input type="hidden" name="TraineeId" value="@Model.TraineeId" />
+                            
+                            <h6 class="fw-bold mb-3">Upgrade & Assign Trainer</h6>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Select New Plan <span class="text-danger">*</span></label>
+                                <select name="NewPlanId" class="form-select form-select-sm" required>
+                                    <option value="">-- Choose a Plan --</option>
+                                    @foreach (var p in Model.EligiblePlans)
+                                    {
+                                        <option value="@p.Value">@p.Text</option>
+                                    }
+                                </select>
+                                <div class="form-text small text-muted">A full new cycle will start today. Any existing active membership will be superseded.</div>
+                            </div>
+                            
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Assign Trainer <span class="text-danger">*</span></label>
+                                    <select name="SelectedTrainerId" class="form-select form-select-sm" required>
+                                        <option value="">-- Choose a Trainer --</option>
+                                        @foreach (var t in Model.AvailableTrainers)
+                                        {
+                                            <option value="@t.Value">@t.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Payment Method</label>
+                                    <select name="UpgradePaymentMethod" class="form-select form-select-sm">
+                                        @foreach (var m in Enum.GetValues<PaymentMethod>())
+                                        {
+                                            <option value="@m">@m</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-sm btn-dark w-100">
+                                <i class="bi bi-person-check me-1"></i> Upgrade Membership & Assign Trainer
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    @* STATE 3: Plan eligible but add-on fee not yet paid *@
+    else if (!Model.TrainerAddonPaid)
+    {
+        <div class="col-12">
+            <div class="alert alert-info d-flex align-items-start gap-3">
+                <i class="bi bi-credit-card-fill fs-4 mt-1 flex-shrink-0"></i>
+                <div class="w-100">
+                    <strong>Personal trainer add-on payment required</strong>
+                    <p class="mb-3 small mt-1">
+                        Plan: <strong>@Model.PlanName</strong>
+                        @if (Model.AddonFeeIsZero)
+                        {
+                            <text> — includes personal trainer at no extra cost.
+                            Confirm to activate trainer access for this cycle.</text>
+                        }
+                        else
+                        {
+                            <text> — one-time add-on fee of
+                            <strong class="text-dark">@Model.TrainerAddonFee.ToString("C")</strong>
+                            for this membership cycle.
+                            Once paid, trainer changes are free for the rest of this cycle.</text>
+                        }
+                    </p>
+
+                    @if (TempData["Error"] is string addonErr)
+                    {
+                        <div class="alert alert-danger small py-2 mb-3">@addonErr</div>
+                    }
+
+                    <form asp-action="PayTrainerAddon" method="post" class="border rounded p-3 bg-white">
+                        <input type="hidden" name="TraineeId" value="@Model.TraineeId" />
+
+                        @if (!Model.AddonFeeIsZero)
+                        {
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-5">
+                                    <label class="form-label fw-semibold small">
+                                        Amount <span class="text-muted fw-normal">(fixed: @Model.TrainerAddonFee.ToString("C"))</span>
+                                    </label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" name="Amount"
+                                               value="@Model.TrainerAddonFee"
+                                               class="form-control" step="0.01" readonly />
+                                    </div>
+                                    <div class="form-text small">No partial payments.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold small">Payment Method</label>
+                                    <select name="Method" class="form-select form-select-sm">
+                                        @foreach (var m in Enum.GetValues<PaymentMethod>())
+                                        {
+                                            <option value="@m">@m</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Notes</label>
+                                    <input type="text" name="Notes"
+                                           class="form-control form-control-sm"
+                                           placeholder="Optional" />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" name="Amount" value="0" />
+                            <input type="hidden" name="Method" value="Cash" />
+                        }
+
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>
+                            @(Model.AddonFeeIsZero
+                                ? "Confirm & Activate Trainer Access"
+                                : "Record Add-On Payment")
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* STATE 4: Fully eligible — show trainer selector *@
+    else
+    {
+        <div class="col-12">
+            <div class="alert alert-success d-flex align-items-center gap-3 py-2">
+                <i class="bi bi-check-circle-fill fs-5 flex-shrink-0"></i>
+                <div class="small">
+                    <strong>Trainer access active</strong>
+                    — Plan: @Model.PlanName · Add-on paid
+                    @if (Model.IsReassignment)
+                    {
+                        <text> · Changing trainer is free for this cycle</text>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (Model.IsReassignment)
+        {
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body d-flex justify-content-between align-items-center py-3">
+                        <div>
+                            <p class="text-muted small mb-1">Current Trainer</p>
+                            <p class="fw-semibold mb-0">
+                                <i class="bi bi-person-check me-1 text-success"></i>
+                                @Model.CurrentTrainerName
+                            </p>
+                        </div>
+                        <form asp-action="RemoveTrainer" method="post"
+                              onsubmit="return confirm('Remove this trainer assignment?')">
+                            <input type="hidden" name="traineeId" value="@Model.TraineeId" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-person-x me-1"></i> Remove Only
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-semibold">
+                    @(Model.IsReassignment ? "Select New Trainer" : "Select Trainer")
+                </div>
+                <div class="card-body">
+                    @if (TempData["Error"] is string err)
+                    {
+                        <div class="alert alert-danger small py-2">@err</div>
+                    }
+                    @if (!Model.AvailableTrainers.Any())
+                    {
+                        <p class="text-muted small mb-0">No active trainers available.</p>
+                    }
+                    else
+                    {
+                        <form asp-action="AssignTrainer" method="post">
+                            <input type="hidden" asp-for="TraineeId" />
+                            <input type="hidden" asp-for="TraineeName" />
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Available Trainers</label>
+                                <div class="d-flex flex-column gap-2">
+                                    @foreach (var t in Model.AvailableTrainers)
+                                    {
+                                        <label class="trainer-card d-flex align-items-center gap-3
+                                                       border rounded p-3" style="cursor:pointer">
+                                            <input type="radio"
+                                                   name="SelectedTrainerId"
+                                                   value="@t.Value"
+                                                   class="form-check-input mt-0 flex-shrink-0"
+                                                   @(Model.AvailableTrainers.First() == t ? "checked" : "") />
+                                            <div class="fw-semibold small">@t.Text</div>
+                                        </label>
+                                    }
+                                </div>
+                                <span asp-validation-for="SelectedTrainerId" class="text-danger small"></span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-dark">
+                                    <i class="bi bi-person-check me-1"></i>
+                                    @(Model.IsReassignment ? "Change Trainer" : "Assign Trainer")
+                                </button>
+                                <a asp-action="Details" asp-route-id="@Model.TraineeId"
+                                   class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+<style>
+    .trainer-card:has(input:checked) { border-color: #0d6efd !important; background-color: #EFF6FF; }
+    .trainer-card:hover { background-color: #F9FAFB; }
+</style>

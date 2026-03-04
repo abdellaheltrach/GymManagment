@@ -10,6 +10,7 @@ public record MembershipPlanDto(
     decimal Price,
     AccessLevel AccessLevel,
     bool IncludesPersonalTrainer,
+    decimal TrainerAddonFee,
     int MaxFreezeDays,
     bool IsActive
 );

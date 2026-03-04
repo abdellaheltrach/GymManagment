@@ -17,5 +17,10 @@ public record MembershipDto(
     decimal RemainingBalance,
     bool IsFullyPaid,
     int TotalFrozenDays,
-    string? Notes
+    string? Notes,
+    // Trainer add-on
+    bool   PlanIncludesTrainer,
+    decimal TrainerAddonFee,
+    bool   TrainerAddonPaid,
+    DateTime? TrainerAddonPaidAt
 );
