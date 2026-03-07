@@ -23,6 +23,7 @@ namespace GymManagement.Infrastructure.Context
 
         public DbSet<Trainee> Trainees => Set<Trainee>();
         public DbSet<Trainer> Trainers => Set<Trainer>();
+        public DbSet<Receptionist> Receptionists => Set<Receptionist>();
         public DbSet<MembershipPlan> MembershipPlans => Set<MembershipPlan>();
         public DbSet<Membership> Memberships => Set<Membership>();
         public DbSet<Payment> Payments => Set<Payment>();

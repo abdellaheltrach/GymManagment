@@ -1,0 +1,106 @@
+﻿@model ReceptionistDetailViewModel
+@{
+    ViewData["Title"] = Model.FullName + " — Staff";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+        <a asp-action="Receptionists" class="text-muted small text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i> Back to Staff
+        </a>
+        <h4 class="fw-bold mb-0 mt-1">@Model.FullName</h4>
+        <span class="@Model.StatusBadge small">@Model.StatusLabel</span>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-action="Edit" asp-route-id="@Model.Id"
+           class="btn btn-sm btn-outline-dark">
+            <i class="bi bi-pencil me-1"></i> Edit
+        </a>
+
+        @if (Model.IsActive)
+        {
+            <form asp-action="Deactivate" method="post"
+                  onsubmit="return confirm('Deactivate @Html.Raw(Model.FullName)? They will be signed out on their next request.')">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button class="btn btn-sm btn-outline-danger" type="submit">
+                    <i class="bi bi-person-x me-1"></i> Deactivate
+                </button>
+            </form>
+        }
+        else
+        {
+            <form asp-action="Reactivate" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button class="btn btn-sm btn-outline-success" type="submit">
+                    <i class="bi bi-person-check me-1"></i> Reactivate
+                </button>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="row g-4">
+
+    @* Profile card *@
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="fw-semibold text-uppercase text-muted small mb-3">Profile</h6>
+                <dl class="row small mb-0">
+                    <dt class="col-5 text-muted">Email</dt>
+                    <dd class="col-7">@Model.Email</dd>
+
+                    <dt class="col-5 text-muted">Phone</dt>
+                    <dd class="col-7">@Model.Phone</dd>
+
+                    <dt class="col-5 text-muted">Hired</dt>
+                    <dd class="col-7">@Model.HireDate.ToString("dd MMM yyyy")</dd>
+
+                    <dt class="col-5 text-muted">Created</dt>
+                    <dd class="col-7">@Model.CreatedAt.ToString("dd MMM yyyy")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    @* Permissions grid *@
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <span class="fw-semibold small text-uppercase text-muted">Permissions</span>
+                <a asp-action="Edit" asp-route-id="@Model.Id"
+                   class="btn btn-sm btn-outline-dark py-0 px-2">
+                    <i class="bi bi-pencil me-1"></i> Edit
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    @foreach (var perm in PermissionUiHelper.AllPermissions)
+                    {
+                        var has = Model.HasPermission(perm.Value);
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start gap-2 p-2 rounded
+                                            @(has ? "bg-light" : "")">
+                                <i class="bi mt-1 flex-shrink-0
+                                              @(has ? "bi-check-circle-fill text-success"
+                                                                                  : "bi-x-circle text-muted opacity-50")"></i>
+                                <div>
+                                    <div class="small fw-semibold @(!has ? "text-muted" : "")">
+                                        @perm.Label
+                                    </div>
+                                    @if (has)
+                                    {
+                                        <div class="text-muted" style="font-size:.72rem">
+                                            @perm.Description
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

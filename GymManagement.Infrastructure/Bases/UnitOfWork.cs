@@ -14,6 +14,7 @@ namespace GymManagement.Infrastructure.Bases
         // ── Lazy-initialised repositories ──────────────────────────────────────
         private IRepository<Trainee>? _trainees;
         private IRepository<Trainer>? _trainers;
+        private IRepository<Receptionist>? _receptionists;
         private IRepository<MembershipPlan>? _membershipPlans;
         private IRepository<Membership>? _memberships;
         private IRepository<Payment>? _payments;
@@ -30,6 +31,7 @@ namespace GymManagement.Infrastructure.Bases
 
         public IRepository<Trainee> Trainees => _trainees ??= new Repository<Trainee>(_context);
         public IRepository<Trainer> Trainers => _trainers ??= new Repository<Trainer>(_context);
+        public IRepository<Receptionist> Receptionists => _receptionists ??= new Repository<Receptionist>(_context);
         public IRepository<MembershipPlan> MembershipPlans => _membershipPlans ??= new Repository<MembershipPlan>(_context);
         public IRepository<Membership> Memberships => _memberships ??= new Repository<Membership>(_context);
         public IRepository<Payment> Payments => _payments ??= new Repository<Payment>(_context);

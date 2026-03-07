@@ -18,7 +18,7 @@ public class MembershipsController : BaseController
 {
     // ── Assign ─────────────────────────────────────────────────────────────────
     [HttpGet]
-    [Authorize(Policy = "CanManageTrainees")]
+    [Authorize(Policy = "CanAssignMemberships")]
     public async Task<IActionResult> Assign(Guid traineeId, CancellationToken ct)
     {
         var traineeResult = await Mediator.Send(new GetTraineeByIdQuery(traineeId), ct);
@@ -37,7 +37,7 @@ public class MembershipsController : BaseController
 
     // POST /Memberships/Assign
     [HttpPost]
-    [Authorize(Policy = "CanManageTrainees")]
+    [Authorize(Policy = "CanAssignMemberships")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Assign(AssignMembershipViewModel vm, CancellationToken ct)
     {
@@ -69,7 +69,7 @@ public class MembershipsController : BaseController
     // ── Renew ──────────────────────────────────────────────────────────────────
     // POST /Memberships/Renew
     [HttpPost]
-    [Authorize(Policy = "CanManageTrainees")]
+    [Authorize(Policy = "CanAssignMemberships")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Renew(
         Guid traineeId, Guid planId,
@@ -90,7 +90,7 @@ public class MembershipsController : BaseController
     // ── Freeze ─────────────────────────────────────────────────────────────────
     // GET /Memberships/Freeze?traineeId={guid}
     [HttpGet]
-    [Authorize(Policy = "CanManageTrainees")]
+    [Authorize(Policy = "CanFreezeMemberships")]
     public async Task<IActionResult> Freeze(Guid traineeId, CancellationToken ct)
     {
         var traineeResult = await Mediator.Send(new GetTraineeByIdQuery(traineeId), ct);
@@ -119,7 +119,7 @@ public class MembershipsController : BaseController
 
     // POST /Memberships/Freeze
     [HttpPost]
-    [Authorize(Policy = "CanManageTrainees")]
+    [Authorize(Policy = "CanFreezeMemberships")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Freeze(FreezeMembershipViewModel vm, CancellationToken ct)
     {
@@ -141,7 +141,7 @@ public class MembershipsController : BaseController
     // ── Cancel ─────────────────────────────────────────────────────────────────
     // GET /Memberships/Cancel?traineeId={guid}
     [HttpGet]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "CanCancelMemberships")]
     public async Task<IActionResult> Cancel(Guid traineeId, CancellationToken ct)
     {
         var traineeResult = await Mediator.Send(new GetTraineeByIdQuery(traineeId), ct);
@@ -175,7 +175,7 @@ public class MembershipsController : BaseController
 
     // POST /Memberships/Cancel
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "CanCancelMemberships")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Cancel(CancelMembershipViewModel vm, CancellationToken ct)
     {

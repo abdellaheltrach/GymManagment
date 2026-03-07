@@ -1,15 +1,18 @@
+using GymManagement.Application.Authorization;
 using GymManagement.Application.Extensions;
+using GymManagement.Domain.Entities.Identity;
+using GymManagement.Domain.Enums;
+using GymManagement.Domain.Interfaces;
 using GymManagement.Infrastructure;
 using GymManagement.Infrastructure.Context;
-using GymManagement.Infrastructure.Persistence;
+using GymManagement.Infrastructure.Middleware;
 using GymManagement.Infrastructure.Persistence.Seeders;
-using GymManagement.Domain.Entities.Identity;
-using GymManagement.Domain.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using GymManagement.Web.Filters;
 using GymManagement.Web.Middleware;
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -71,33 +74,37 @@ try
     #region Configure Authorization Policies
     builder.Services.AddAuthorization(options =>
     {
-        // By default, require authentication for all endpoints.
-        // Controllers/actions that should be public must use [AllowAnonymous].
-        options.FallbackPolicy =
-            new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        options.FallbackPolicy = new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
             .Build();
 
-        options.AddPolicy("CanManageTrainees",
-            p => p.RequireRole("Admin", "Receptionist"));
+        // Role-only (admin)
+        options.AddPolicy("CanManageTrainers", p => p.RequireRole("Admin"));
+        options.AddPolicy("CanManagePlans", p => p.RequireRole("Admin"));
+        options.AddPolicy("CanManageStaff", p => p.RequireRole("Admin"));
+        options.AddPolicy("TrainerAccess", p => p.RequireRole("Admin", "Trainer"));
 
-        options.AddPolicy("CanManageTrainers",
-            p => p.RequireRole("Admin"));
+        // Bitmask policies — Admin bypasses in HasPermissionHandler
+        void AddPerm(string name, ReceptionistPermission perm)
+            => options.AddPolicy(name, policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.AddRequirements(new HasPermissionRequirement(perm));
+            });
 
-        options.AddPolicy("CanRecordPayments",
-            p => p.RequireRole("Admin", "Receptionist"));
+        AddPerm("CanManageTrainees", ReceptionistPermission.RegisterTrainees);
+        AddPerm("CanEditTraineeProfile", ReceptionistPermission.EditTraineeProfile);
 
-        options.AddPolicy("CanViewReports",
-            p => p.RequireRole("Admin"));
+        AddPerm("CanRecordPayments", ReceptionistPermission.RecordPayments);
 
-        options.AddPolicy("CanManagePlans",
-            p => p.RequireRole("Admin"));
+        AddPerm("CanAssignMemberships", ReceptionistPermission.AssignMemberships);
+        AddPerm("CanFreezeMemberships", ReceptionistPermission.FreezeMemberships);
+        AddPerm("CanCancelMemberships", ReceptionistPermission.CancelMemberships);
+        AddPerm("CanSuspendMemberships", ReceptionistPermission.SuspendMemberships);
 
-        options.AddPolicy("CanMarkAttendance",
-            p => p.RequireRole("Admin", "Receptionist", "Trainer"));
-
-        options.AddPolicy("TrainerAccess",
-            p => p.RequireRole("Admin", "Trainer"));
+        AddPerm("CanCheckIn", ReceptionistPermission.CheckInTrainees);
+        AddPerm("CanMarkAttendance", ReceptionistPermission.CheckInTrainees);
+        AddPerm("CanViewReports", ReceptionistPermission.ViewFinancialReports);
     });
     #endregion
 
@@ -138,7 +145,9 @@ try
     builder.Services.AddMemoryCache(); // Required for Hangfire Dashboard to store job information and dashboard state
     #endregion
 
-
+    #region Add Authorization Handlers
+    builder.Services.AddScoped<IAuthorizationHandler, HasPermissionHandler>();
+    #endregion
 
 
     // builder.Services.AddScoped<DatabaseSeeder>(); // Now registered in Infrastructure
@@ -197,7 +206,7 @@ try
     app.UseRateLimiter();
 
     app.UseAuthentication();
-
+    app.UseMiddleware<ReceptionistPermissionRefreshMiddleware>();
     app.UseAuthorization();
 
     #endregion

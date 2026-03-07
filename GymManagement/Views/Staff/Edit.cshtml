@@ -1,0 +1,129 @@
+﻿@model EditReceptionistViewModel
+@using GymManagement.Domain.Enums
+@{
+    ViewData["Title"] = "Edit Receptionist";
+}
+
+<div class="mb-4">
+    <a asp-action="Details" asp-route-id="@Model.ReceptionistId"
+       class="text-muted small text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i> Back to Profile
+    </a>
+    <h4 class="fw-bold mb-0 mt-1">Edit Receptionist</h4>
+</div>
+
+<div style="max-width:860px">
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="ReceptionistId" />
+        <div asp-validation-summary="All"
+             class="alert alert-danger small py-2 mb-3"></div>
+
+        @* Profile *@
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white fw-semibold small text-uppercase text-muted">
+                Profile
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="FirstName" class="form-label fw-semibold small"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="LastName" class="form-label fw-semibold small"></label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Phone" class="form-label fw-semibold small"></label>
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* Permissions *@
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="fw-semibold small text-uppercase text-muted">Permissions</span>
+                    <span class="ms-2 badge bg-info text-dark small">
+                        Takes effect on their next request
+                    </span>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2"
+                            onclick="setAll(true)">
+                        All
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2"
+                            onclick="setAll(false)">
+                        None
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-dark py-0 px-2"
+                            onclick="setPreset()">
+                        Standard
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    @foreach (var perm in PermissionUiHelper.AllPermissions)
+                    {
+                        var isChecked = Model.SelectedPermissions.Contains((int)perm.Value);
+                        <div class="col-md-6">
+                            <label class="perm-card d-flex align-items-start gap-3 border rounded p-3"
+                                   style="cursor:pointer">
+                                <input type="checkbox"
+                                       name="SelectedPermissions"
+                                       value="@((int)perm.Value)"
+                                       class="form-check-input mt-1 flex-shrink-0 perm-check"
+                                       @(isChecked ? "checked" : "") />
+                                <div>
+                                    <div class="fw-semibold small">@perm.Label</div>
+                                    <div class="text-muted small">@perm.Description</div>
+                                </div>
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-dark">
+                <i class="bi bi-floppy me-1"></i> Save Changes
+            </button>
+            <a asp-action="Details" asp-route-id="@Model.ReceptionistId"
+               class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .perm-card:has(input:checked) {
+        border-color: #0d6efd !important;
+        background: #eff6ff;
+    }
+
+    .perm-card:hover {
+        background: #f9fafb;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        const standardBits = @((int)ReceptionistPermission.StandardDesk);
+        function setAll(v) {
+            document.querySelectorAll('.perm-check').forEach(cb => cb.checked = v);
+        }
+        function setPreset() {
+            document.querySelectorAll('.perm-check').forEach(cb => {
+                const bit = parseInt(cb.value);
+                cb.checked = (standardBits & bit) === bit;
+            });
+        }
+    </script>
+}

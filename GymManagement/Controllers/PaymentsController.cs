@@ -12,16 +12,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GymManagement.Web.Controllers;
 
-[Authorize(Policy = "CanRecordPayments")]
+[Authorize]
 public class PaymentsController : BaseController
 {
     // ── Index ──────────────────────────────────────────────────────────────────
     // GET /Payments  — lists all payment records with filters
     [HttpGet]
     public async Task<IActionResult> Index(
-        int page = 1, 
+        int page = 1,
         string? searchTerm = null,
-        PaymentMethod? method = null, 
+        PaymentMethod? method = null,
         PaymentStatus? status = null,
         CancellationToken ct = default)
     {
@@ -30,12 +30,13 @@ public class PaymentsController : BaseController
         ViewBag.CurrentSearch = searchTerm;
         ViewBag.CurrentMethod = method;
         ViewBag.CurrentStatus = status;
-        
+
         return HandleResult(result, paged => View(paged));
     }
 
     // ── Update GET ─────────────────────────────────────────────────────────────
     [HttpGet]
+    [Authorize(Policy = "CanRecordPayments")]
     public async Task<IActionResult> Update(Guid id, CancellationToken ct)
     {
         var result = await Mediator.Send(new GetPaymentByIdQuery(id), ct);
@@ -49,12 +50,13 @@ public class PaymentsController : BaseController
             AlreadyPaid = p.Amount,
             RemainingBalance = p.RemainingBalance,
             Method = p.Method,
-            AdditionalAmount = p.RemainingBalance 
+            AdditionalAmount = p.RemainingBalance
         }));
     }
 
     // ── Update POST ────────────────────────────────────────────────────────────
     [HttpPost]
+    [Authorize(Policy = "CanRecordPayments")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Update(UpdatePaymentViewModel vm, CancellationToken ct)
     {
@@ -78,6 +80,7 @@ public class PaymentsController : BaseController
     // ── Record GET ─────────────────────────────────────────────────────────────
     // GET /Payments/Record?traineeId={guid}
     [HttpGet]
+    [Authorize(Policy = "CanRecordPayments")]
     public async Task<IActionResult> Record(Guid traineeId, CancellationToken ct)
     {
         var traineeResult = await Mediator.Send(new GetTraineeByIdQuery(traineeId), ct);
@@ -107,8 +110,8 @@ public class PaymentsController : BaseController
     // ── Record POST ────────────────────────────────────────────────────────────
     // POST /Payments/Record
     [HttpPost]
+    [Authorize(Policy = "CanRecordPayments")]
     [ValidateAntiForgeryToken]
-
     public async Task<IActionResult> Record(RecordPaymentViewModel vm, CancellationToken ct)
     {
         if (!ModelState.IsValid) return View(vm);

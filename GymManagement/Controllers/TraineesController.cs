@@ -1,10 +1,10 @@
-﻿using GymManagement.Application.Features.Trainees.Commands.Models;
+﻿using GymManagement.Application.Features.Memberships.Commands.PayTrainerAddon;
+using GymManagement.Application.Features.Trainees.Commands.Models;
 using GymManagement.Application.Features.Trainees.Queries.Models;
-using GymManagement.Application.Features.Memberships.Commands.PayTrainerAddon;
 using GymManagement.Application.Features.Trainers.Commands.AssignOrReassignTrainer;
 using GymManagement.Application.Features.Trainers.Commands.UpgradeAndAssignTrainer;
-using GymManagement.Domain.Interfaces;
 using GymManagement.Domain.Enums;
+using GymManagement.Domain.Interfaces;
 using GymManagement.Web.Bases;
 using GymManagement.Web.Extensions;
 using GymManagement.Web.ViewModels.Shared;
@@ -14,11 +14,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GymManagement.Web.Controllers;
 
-// ── DO NOT add [Route("[controller]")] here ───────────────────────────────────
-// This controller uses convention routing defined in Program.cs:
-//   pattern: "{controller=Dashboard}/{action=Index}/{id?}"
-// Mixing a class-level [Route] attribute with convention routing breaks all
-// action resolution — MVC can no longer match GET /Trainees to Index().
 [Authorize]
 public class TraineesController : BaseController
 {
@@ -98,7 +93,7 @@ public class TraineesController : BaseController
     // ── Edit ───────────────────────────────────────────────────────────────────
     // GET /Trainees/Edit?id={guid}
     [HttpGet]
-    [Authorize(Policy = "CanManageTrainees")]
+    [Authorize(Policy = "CanEditTraineeProfile")]
     public async Task<IActionResult> Edit(Guid id, CancellationToken ct)
     {
         var result = await Mediator.Send(new GetTraineeByIdQuery(id), ct);
@@ -124,7 +119,7 @@ public class TraineesController : BaseController
 
     // POST /Trainees/Edit
     [HttpPost]
-    [Authorize(Policy = "CanManageTrainees")]
+    [Authorize(Policy = "CanEditTraineeProfile")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(EditTraineeViewModel vm, CancellationToken ct)
     {
@@ -194,9 +189,9 @@ public class TraineesController : BaseController
         {
             var plan = await _uow.MembershipPlans.GetByIdAsync(activeMembership.PlanId, ct);
             planIncludesTrainer = plan?.IncludesPersonalTrainer ?? false;
-            planName            = plan?.Name ?? "Unknown";
-            trainerAddonFee     = plan?.TrainerAddonFee ?? 0;
-            trainerAddonPaid    = activeMembership.TrainerAddonPaid;
+            planName = plan?.Name ?? "Unknown";
+            trainerAddonFee = plan?.TrainerAddonFee ?? 0;
+            trainerAddonPaid = activeMembership.TrainerAddonPaid;
         }
 
         // If plan does not include trainer, get eligible plans for upgrade dropdown
@@ -215,16 +210,16 @@ public class TraineesController : BaseController
         {
             TraineeId = traineeId,
             TraineeName = trainee.FullName,
-            MembershipId        = activeMembership?.Id,
+            MembershipId = activeMembership?.Id,
             CurrentTrainerName = current is not null
                 ? (await _uow.Trainers.GetByIdAsync(current.TrainerId, ct))?.FullName
                 : null,
             PlanName = planName,
             PlanIncludesTrainer = planIncludesTrainer,
             HasActiveMembership = activeMembership is not null,
-            TrainerAddonPaid    = trainerAddonPaid,
-            TrainerAddonFee     = trainerAddonFee,
-            EligiblePlans       = eligiblePlans,
+            TrainerAddonPaid = trainerAddonPaid,
+            TrainerAddonFee = trainerAddonFee,
+            EligiblePlans = eligiblePlans,
             AvailableTrainers = trainers
                 .OrderBy(t => t.FullName)
                 .Select(t => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(

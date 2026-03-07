@@ -7,6 +7,7 @@ public interface IUnitOfWork : IDisposable
     // ── Repositories ──────────────────────────────────────
     IRepository<Trainee> Trainees { get; }
     IRepository<Trainer> Trainers { get; }
+    IRepository<Receptionist> Receptionists { get; }
     IRepository<MembershipPlan> MembershipPlans { get; }
     IRepository<Membership> Memberships { get; }
     IRepository<Payment> Payments { get; }

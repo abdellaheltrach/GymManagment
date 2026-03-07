@@ -1,12 +1,11 @@
 ﻿using GymManagement.Domain.Entities.Identity;
+using GymManagement.Domain.Interfaces;
 using GymManagement.Domain.Options;
 using GymManagement.Infrastructure.Bases;
-using GymManagement.Domain.Interfaces;
 using GymManagement.Infrastructure.Context;
+using GymManagement.Infrastructure.Identity;
 using GymManagement.Infrastructure.Interceptors;
 using GymManagement.Infrastructure.Jobs;
-using GymManagement.Infrastructure.Persistence;
-using GymManagement.Infrastructure.Identity;
 using GymManagement.Infrastructure.Persistence.Identity;
 using Hangfire;
 using Hangfire.SqlServer;
@@ -26,7 +25,7 @@ namespace GymManagement.Infrastructure
             var jwtSettings = new JwtSettings();
             var cookieSettings = new CookieSettings();
             var emailSettings = new EmailSettings();
-            
+
             configuration.GetSection(nameof(JwtSettings)).Bind(jwtSettings);
             configuration.GetSection(nameof(CookieSettings)).Bind(cookieSettings);
             configuration.GetSection(nameof(EmailSettings)).Bind(emailSettings);
@@ -101,8 +100,15 @@ namespace GymManagement.Infrastructure
             // ── Identity Service ──────────────────────────────────────────────
             services.AddScoped<IIdentityService, IdentityService>();
 
-            // ── Memory cache (for RevenueReportJob) ───────────────────────────
-            // Already registered above
+
+            // ── Receptionist bitmask claims factory ────────────────────────────
+            // Replaces the default IUserClaimsPrincipalFactory so that the
+            // "receptionist_permissions" claim is added to the cookie on every login.
+            services.AddScoped<
+                IUserClaimsPrincipalFactory<ApplicationUser>,
+                ReceptionistClaimsPrincipalFactory>();
+
+
 
             // ── Hangfire ───────────────────────────────────────────────────────
             services.AddHangfire(config => config
